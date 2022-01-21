@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/rwlist/gjrpc/internal/gen"
+	"github.com/rwlist/gjrpc/internal/gen/argparse"
 	"os"
-
-	"github.com/rwlist/gjrpc/pkg/gen"
-	"github.com/rwlist/gjrpc/pkg/gen/argparse"
 )
 
 func main() {

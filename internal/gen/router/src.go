@@ -2,11 +2,11 @@ package router
 
 import (
 	"fmt"
+	"github.com/rwlist/gjrpc/internal/gen/astinfo"
+	"github.com/rwlist/gjrpc/internal/gen/protog"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
-	"github.com/rwlist/gjrpc/pkg/gen/astinfo"
-	"github.com/rwlist/gjrpc/pkg/gen/protog"
 )
 
 type queueItem struct {
@@ -18,9 +18,13 @@ func (r *Router) GenerateSrc() (*jen.File, error) {
 	f := jen.NewFile(r.currentPkg.PkgName)
 
 	r.genStruct(f)
+	f.Line()
 	r.genConstructor(f)
+	f.Line()
 	r.genConvertError(f)
+	f.Line()
 	r.genNotFound(f)
+	f.Line()
 	r.genMainHandle(f)
 
 	queue := []queueItem{{
@@ -32,6 +36,7 @@ func (r *Router) GenerateSrc() (*jen.File, error) {
 		item := queue[0]
 		queue = queue[1:]
 
+		f.Line()
 		err := r.genHandle(f, item)
 		if err != nil {
 			return nil, err

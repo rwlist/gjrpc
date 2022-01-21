@@ -2,11 +2,11 @@ package gen
 
 import (
 	"fmt"
+	"github.com/rwlist/gjrpc/internal/gen/astinfo"
+	"github.com/rwlist/gjrpc/internal/gen/protog"
+	"github.com/rwlist/gjrpc/internal/gen/router"
 
 	"github.com/dave/jennifer/jen"
-	"github.com/rwlist/gjrpc/pkg/gen/astinfo"
-	"github.com/rwlist/gjrpc/pkg/gen/protog"
-	"github.com/rwlist/gjrpc/pkg/gen/router"
 )
 
 type genServerRouterArgs struct {

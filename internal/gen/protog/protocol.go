@@ -1,13 +1,12 @@
 package protog
 
 import (
+	astinfo2 "github.com/rwlist/gjrpc/internal/gen/astinfo"
 	"strings"
-
-	"github.com/rwlist/gjrpc/pkg/gen/astinfo"
 )
 
 type Protocol struct {
-	Package  *astinfo.Package
+	Package  *astinfo2.Package
 	Services []Service
 	Types    map[string]ProtocolType
 }
@@ -24,13 +23,13 @@ func (p Protocol) FindServiceByGoType(name string) *Service {
 
 type Service struct {
 	Path      []string
-	Interface *astinfo.Type
+	Interface *astinfo2.Type
 	Methods   []Method
 }
 
 type Method struct {
 	Path   []string
-	Method *astinfo.Method
+	Method *astinfo2.Method
 }
 
 type ProtocolType struct {

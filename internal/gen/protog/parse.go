@@ -2,13 +2,12 @@ package protog
 
 import (
 	"fmt"
-
-	"github.com/rwlist/gjrpc/pkg/gen/astinfo"
+	astinfo2 "github.com/rwlist/gjrpc/internal/gen/astinfo"
 )
 
 // Parse protocol definition located in specified directory.
 func Parse(path string) (*Protocol, error) {
-	pkg, err := astinfo.ParseDir(path)
+	pkg, err := astinfo2.ParseDir(path)
 	if err != nil {
 		return nil, err
 	}
@@ -38,12 +37,12 @@ func Parse(path string) (*Protocol, error) {
 	return proto, nil
 }
 
-func parseService(info *astinfo.Type) (*Service, error) {
-	if info.Kind != astinfo.Interface {
+func parseService(info *astinfo2.Type) (*Service, error) {
+	if info.Kind != astinfo2.Interface {
 		return nil, nil
 	}
 
-	var serviceAnno *astinfo.Annotation
+	var serviceAnno *astinfo2.Annotation
 	for _, anno := range info.Annotations {
 		switch anno.Key {
 		case "gjrpc:service":
@@ -86,8 +85,8 @@ func parseService(info *astinfo.Type) (*Service, error) {
 	}, nil
 }
 
-func parseMethod(method *astinfo.Method) (*Method, error) {
-	var methodAnno *astinfo.Annotation
+func parseMethod(method *astinfo2.Method) (*Method, error) {
+	var methodAnno *astinfo2.Annotation
 	for _, anno := range method.Annotations {
 		switch anno.Key {
 		case "gjrpc:method":

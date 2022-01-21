@@ -1,6 +1,9 @@
 package jsonrpc
 
-import "encoding/json"
+import (
+	"context"
+	"encoding/json"
+)
 
 const Version = "2.0"
 
@@ -23,6 +26,10 @@ type Request struct {
 	// or NULL value if included.
 	ID ID `json:"id"`
 
-	// Authorization header from HTTP request.
-	Authorization string `json:"-"`
+	// TODO: should Authorization stay here?
+	//// Authorization header from HTTP request.
+	//Authorization string `json:"-"`
+
+	// Context with additional metadata for the request.
+	Context context.Context `json:"-"`
 }

@@ -1,11 +1,11 @@
 package gen
 
 import (
+	"github.com/rwlist/gjrpc/internal/gen/argparse"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/rwlist/gjrpc/pkg/gen/argparse"
 	"github.com/stretchr/testify/assert"
 )
 

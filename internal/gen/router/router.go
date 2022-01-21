@@ -2,9 +2,8 @@ package router
 
 import (
 	"fmt"
-
-	"github.com/rwlist/gjrpc/pkg/gen/astinfo"
-	"github.com/rwlist/gjrpc/pkg/gen/protog"
+	astinfo2 "github.com/rwlist/gjrpc/internal/gen/astinfo"
+	"github.com/rwlist/gjrpc/internal/gen/protog"
 )
 
 type Names struct {
@@ -18,7 +17,7 @@ type Names struct {
 
 type Router struct {
 	proto      *protog.Protocol
-	currentPkg *astinfo.Package
+	currentPkg *astinfo2.Package
 	handlers   []*handler
 	endpoints  []endpoint
 	tree       *node
@@ -26,8 +25,8 @@ type Router struct {
 	Names
 }
 
-func NewRouter(proto *protog.Protocol, currentPkg *astinfo.Package, handlersStruct *astinfo.Type, names *Names) (*Router, error) {
-	if handlersStruct.Kind != astinfo.Struct {
+func NewRouter(proto *protog.Protocol, currentPkg *astinfo2.Package, handlersStruct *astinfo2.Type, names *Names) (*Router, error) {
+	if handlersStruct.Kind != astinfo2.Struct {
 		return nil, fmt.Errorf("%s must be struct", handlersStruct.Name)
 	}
 

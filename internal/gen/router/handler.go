@@ -2,10 +2,9 @@ package router
 
 import (
 	"fmt"
+	astinfo2 "github.com/rwlist/gjrpc/internal/gen/astinfo"
+	"github.com/rwlist/gjrpc/internal/gen/protog"
 	"os"
-
-	"github.com/rwlist/gjrpc/pkg/gen/astinfo"
-	"github.com/rwlist/gjrpc/pkg/gen/protog"
 )
 
 type handler struct {
@@ -15,8 +14,8 @@ type handler struct {
 	endpoints     []endpoint
 }
 
-func newHandlerFromAST(f astinfo.Field, currentPkg *astinfo.Package, proto *protog.Protocol) (*handler, error) {
-	var routeAnno *astinfo.Annotation
+func newHandlerFromAST(f astinfo2.Field, currentPkg *astinfo2.Package, proto *protog.Protocol) (*handler, error) {
+	var routeAnno *astinfo2.Annotation
 	for _, anno := range f.Annotations {
 		switch anno.Key {
 		case "gjrpc:handle-route":
@@ -90,7 +89,7 @@ func newHandlerFromAST(f astinfo.Field, currentPkg *astinfo.Package, proto *prot
 	}, nil
 }
 
-func lookupUserHandler(currentPkg *astinfo.Package, proto *protog.Protocol, userType string) (*astinfo.Type, error) { //nolint:unparam
+func lookupUserHandler(currentPkg *astinfo2.Package, proto *protog.Protocol, userType string) (*astinfo2.Type, error) { //nolint:unparam
 	// TODO: implement real lookup
 	serv := proto.FindServiceByGoType(userType)
 	if serv != nil {
@@ -108,11 +107,11 @@ type methodImpl struct {
 	// field in the handlers struct, usually service name
 	handler string
 
-	methodAST   astinfo.Method
+	methodAST   astinfo2.Method
 	methodProto *protog.Method
 }
 
-func prepareUserHandler(handler string, userAST *astinfo.Type) (*userHandler, error) { //nolint:unparam
+func prepareUserHandler(handler string, userAST *astinfo2.Type) (*userHandler, error) { //nolint:unparam
 	uh := &userHandler{
 		methods: map[string]*methodImpl{},
 	}

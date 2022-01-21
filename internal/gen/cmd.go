@@ -2,9 +2,8 @@ package gen
 
 import (
 	"fmt"
+	"github.com/rwlist/gjrpc/internal/gen/argparse"
 	"os"
-
-	"github.com/rwlist/gjrpc/pkg/gen/argparse"
 )
 
 func FromCmdline(args *argparse.CliArgs) {
