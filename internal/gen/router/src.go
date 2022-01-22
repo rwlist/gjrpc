@@ -1,7 +1,7 @@
 package router
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 	"github.com/rwlist/gjrpc/internal/gen/astinfo"
 	"github.com/rwlist/gjrpc/internal/gen/protog"
 	"strings"
@@ -163,7 +163,7 @@ func (r *Router) genMethodCall(g *jen.Group, e *endpoint) error {
 		default:
 			// TODO: assert compatibility with methodProto
 			if requestType != nil {
-				return fmt.Errorf("should be exactly one request object, found %s and %s", requestType.GoString(), param.Type)
+				return errors.Errorf("should be exactly one request object, found %s and %s", requestType.GoString(), param.Type)
 			}
 
 			requestType = jen.Qual(r.proto.Package.PkgImportPath, param.Type)
@@ -200,14 +200,14 @@ func (r *Router) genMethodCall(g *jen.Group, e *endpoint) error {
 		switch res.Type {
 		case "error":
 			if resError != nil {
-				return fmt.Errorf("should be exactly one error object, found %s and %s", resError.Type, res.Type)
+				return errors.Errorf("should be exactly one error object, found %s and %s", resError.Type, res.Type)
 			}
 			res := res
 			resError = &res
 			results = append(results, jen.Id(errVar))
 		default:
 			if resResponse != nil {
-				return fmt.Errorf("should be exactly one result, found %s and %s", resResponse.Type, res.Type)
+				return errors.Errorf("should be exactly one result, found %s and %s", resResponse.Type, res.Type)
 			}
 			res := res
 			resResponse = &res
@@ -216,7 +216,7 @@ func (r *Router) genMethodCall(g *jen.Group, e *endpoint) error {
 	}
 
 	if resError == nil {
-		return fmt.Errorf("function %s doesn't return error object", method.methodAST.Name)
+		return errors.Errorf("function %s doesn't return error object", method.methodAST.Name)
 	}
 
 	// TODO: validate resResponse and resError types

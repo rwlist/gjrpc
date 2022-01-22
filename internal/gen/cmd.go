@@ -11,7 +11,7 @@ func FromCmdline(args *argparse.CliArgs) {
 	case "gen:server:router":
 		err := cmdServerRouter(args.Args)
 		if err != nil {
-			fmt.Println("Error happened,", err)
+			fmt.Printf("Error happened, %+v", err)
 			os.Exit(1)
 		}
 	default:

@@ -10,7 +10,7 @@ import (
 func main() {
 	args, err := argparse.ParseCliArgs(os.Args[1:])
 	if err != nil {
-		fmt.Println("Failed to parse args,", err)
+		fmt.Printf("Failed to parse args, %+v", err)
 		return
 	}
 

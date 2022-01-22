@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	astinfo2 "github.com/rwlist/gjrpc/internal/gen/astinfo"
 	"github.com/rwlist/gjrpc/internal/gen/protog"
 	"os"
@@ -20,12 +21,12 @@ func newHandlerFromAST(f astinfo2.Field, currentPkg *astinfo2.Package, proto *pr
 		switch anno.Key {
 		case "gjrpc:handle-route":
 			if routeAnno != nil {
-				return nil, fmt.Errorf("duplicated annotation %s on field %s", anno.Key, f.Name)
+				return nil, errors.Errorf("duplicated annotation %s on field %s", anno.Key, f.Name)
 			}
 			anno := anno
 			routeAnno = &anno
 		default:
-			return nil, fmt.Errorf("unknown annotation %s on field %s", anno.Key, f.Name)
+			return nil, errors.Errorf("unknown annotation %s on field %s", anno.Key, f.Name)
 		}
 	}
 
@@ -34,13 +35,13 @@ func newHandlerFromAST(f astinfo2.Field, currentPkg *astinfo2.Package, proto *pr
 	}
 
 	if len(routeAnno.Values) != 1 {
-		return nil, fmt.Errorf("invalid annotation %s on field %s", routeAnno.Key, f.Name)
+		return nil, errors.Errorf("invalid annotation %s on field %s", routeAnno.Key, f.Name)
 	}
 	targetServiceName := routeAnno.Values[0]
 
 	targetService := proto.FindServiceByGoType(targetServiceName)
 	if targetService == nil {
-		return nil, fmt.Errorf("service named %s not found", targetServiceName)
+		return nil, errors.Errorf("service named %s not found", targetServiceName)
 	}
 
 	userAST, err := lookupUserHandler(currentPkg, proto, f.Type)
@@ -100,7 +101,7 @@ func lookupUserHandler(currentPkg *astinfo2.Package, proto *protog.Protocol, use
 		return localType, nil
 	}
 
-	return nil, fmt.Errorf("type %s not found", userType)
+	return nil, errors.Errorf("type %s not found", userType)
 }
 
 type userHandler struct {

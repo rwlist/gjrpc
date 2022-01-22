@@ -1,7 +1,7 @@
 package router
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 	"github.com/rwlist/gjrpc/internal/gen/protog"
 	"sort"
 )
@@ -16,7 +16,7 @@ func newTree(handlers []*handler, endpoints []endpoint) (*node, error) {
 		nd := treeFindCreate(root, h.path)
 
 		if nd.handler != nil {
-			return nil, fmt.Errorf("duplicate handler at path %s", protog.PathToString(h.path))
+			return nil, errors.Errorf("duplicate handler at path %s", protog.PathToString(h.path))
 		}
 		nd.handler = h
 	}
@@ -28,7 +28,7 @@ func newTree(handlers []*handler, endpoints []endpoint) (*node, error) {
 		nd := treeFindCreate(root, e.path)
 
 		if nd.endpoint != nil {
-			return nil, fmt.Errorf("duplicate endpoint at path %s", protog.PathToString(e.path))
+			return nil, errors.Errorf("duplicate endpoint at path %s", protog.PathToString(e.path))
 		}
 
 		e := e

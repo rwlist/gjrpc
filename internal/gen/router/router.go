@@ -1,7 +1,7 @@
 package router
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 	astinfo2 "github.com/rwlist/gjrpc/internal/gen/astinfo"
 	"github.com/rwlist/gjrpc/internal/gen/protog"
 )
@@ -27,7 +27,7 @@ type Router struct {
 
 func NewRouter(proto *protog.Protocol, currentPkg *astinfo2.Package, handlersStruct *astinfo2.Type, names *Names) (*Router, error) {
 	if handlersStruct.Kind != astinfo2.Struct {
-		return nil, fmt.Errorf("%s must be struct", handlersStruct.Name)
+		return nil, errors.Errorf("%s must be struct", handlersStruct.Name)
 	}
 
 	var handlers []*handler

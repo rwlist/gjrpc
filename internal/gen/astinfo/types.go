@@ -5,6 +5,7 @@ type Kind string
 const (
 	Interface Kind = "interface"
 	Struct    Kind = "struct"
+	Alias     Kind = "alias" // type localType AnotherType
 )
 
 type Type struct {

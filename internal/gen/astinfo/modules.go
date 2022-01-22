@@ -2,7 +2,7 @@ package astinfo
 
 import (
 	"bytes"
-	"fmt"
+	"github.com/pkg/errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -25,7 +25,7 @@ func findModuleRoots() ([]Dir, error) {
 	gomod := string(bytes.TrimSpace(stdout))
 
 	if gomod == "" || gomod == os.DevNull {
-		return nil, fmt.Errorf("no go modules detected")
+		return nil, errors.Errorf("no go modules detected")
 	}
 
 	cmd := exec.Command("go", "list", "-m", "-f={{.Path}}\t{{.Dir}}", "all")
@@ -65,5 +65,5 @@ func findPackagePath(pkgDir string) (string, error) {
 		}
 	}
 
-	return "", fmt.Errorf("not found")
+	return "", errors.Errorf("not found")
 }

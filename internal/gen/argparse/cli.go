@@ -1,7 +1,7 @@
 package argparse
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 	"strings"
 )
 
@@ -24,7 +24,7 @@ func ParseCliArgs(args []string) (*CliArgs, error) {
 	for _, arg := range args {
 		rawArg := strings.TrimPrefix(arg, "--")
 		if rawArg == arg {
-			return nil, fmt.Errorf("arguments must start with -- but found \"%s\"", arg)
+			return nil, errors.Errorf("arguments must start with -- but found \"%s\"", arg)
 		}
 
 		kv := strings.SplitN(rawArg, "=", 2)
@@ -32,12 +32,12 @@ func ParseCliArgs(args []string) (*CliArgs, error) {
 			kv = append(kv, "")
 		}
 		if len(kv) != 2 { //nolint:gomnd
-			return nil, fmt.Errorf("invalid argument found \"%s\"", arg)
+			return nil, errors.Errorf("invalid argument found \"%s\"", arg)
 		}
 		key, value := kv[0], kv[1]
 
 		if _, ok := res.Args[key]; ok {
-			return nil, fmt.Errorf("duplicate argument %s", key)
+			return nil, errors.Errorf("duplicate argument %s", key)
 		}
 		res.Args[key] = value
 	}

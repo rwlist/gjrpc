@@ -1,7 +1,7 @@
 package protog
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 	astinfo2 "github.com/rwlist/gjrpc/internal/gen/astinfo"
 )
 
@@ -47,12 +47,12 @@ func parseService(info *astinfo2.Type) (*Service, error) {
 		switch anno.Key {
 		case "gjrpc:service":
 			if serviceAnno != nil {
-				return nil, fmt.Errorf("duplicated annotation %s on type %s", anno.Key, info.Name)
+				return nil, errors.Errorf("duplicated annotation %s on type %s", anno.Key, info.Name)
 			}
 			anno := anno
 			serviceAnno = &anno
 		default:
-			return nil, fmt.Errorf("unknown annotation %s on type %s", anno.Key, info.Name)
+			return nil, errors.Errorf("unknown annotation %s on type %s", anno.Key, info.Name)
 		}
 	}
 
@@ -61,7 +61,7 @@ func parseService(info *astinfo2.Type) (*Service, error) {
 	}
 
 	if len(serviceAnno.Values) != 1 {
-		return nil, fmt.Errorf("invalid annotation %s on type %s", serviceAnno.Key, info.Name)
+		return nil, errors.Errorf("invalid annotation %s on type %s", serviceAnno.Key, info.Name)
 	}
 
 	var methods []Method
@@ -72,7 +72,7 @@ func parseService(info *astinfo2.Type) (*Service, error) {
 			return nil, err
 		}
 		if method == nil {
-			return nil, fmt.Errorf("method %s.%s has no valid annotations", info.Name, astMethod.Name)
+			return nil, errors.Errorf("method %s.%s has no valid annotations", info.Name, astMethod.Name)
 		}
 
 		methods = append(methods, *method)
@@ -91,12 +91,12 @@ func parseMethod(method *astinfo2.Method) (*Method, error) {
 		switch anno.Key {
 		case "gjrpc:method":
 			if methodAnno != nil {
-				return nil, fmt.Errorf("duplicated annotation %s on method %s", anno.Key, method.Name)
+				return nil, errors.Errorf("duplicated annotation %s on method %s", anno.Key, method.Name)
 			}
 			anno := anno
 			methodAnno = &anno
 		default:
-			return nil, fmt.Errorf("unknown annotation %s on method %s", anno.Key, method.Name)
+			return nil, errors.Errorf("unknown annotation %s on method %s", anno.Key, method.Name)
 		}
 	}
 
@@ -105,7 +105,7 @@ func parseMethod(method *astinfo2.Method) (*Method, error) {
 	}
 
 	if len(methodAnno.Values) != 1 {
-		return nil, fmt.Errorf("invalid annotation %s on method %s", methodAnno.Key, method.Name)
+		return nil, errors.Errorf("invalid annotation %s on method %s", methodAnno.Key, method.Name)
 	}
 
 	return &Method{

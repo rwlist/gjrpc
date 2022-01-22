@@ -1,7 +1,7 @@
 package astinfo
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 	"go/ast"
 	"go/build"
 	"go/parser"
@@ -35,14 +35,14 @@ func ParseDir(path string) (*Package, error) {
 	}
 
 	if len(pkgs) != 1 {
-		return nil, fmt.Errorf("required exactly 1 package in directory, found %v", len(pkgs))
+		return nil, errors.Errorf("required exactly 1 package in directory, found %v", len(pkgs))
 	}
 
 	for _, pkg := range pkgs {
 		return ParsePkg(pkg, buildPkg)
 	}
 
-	return nil, fmt.Errorf("unreachable")
+	return nil, errors.Errorf("unreachable")
 }
 
 func ParsePkg(pkg *ast.Package, buildPkg *build.Package) (*Package, error) {
@@ -111,12 +111,15 @@ func parseType(pkg *Package, s *ast.TypeSpec, doc *ast.CommentGroup) error {
 		if err != nil {
 			return err
 		}
+	case *ast.Ident:
+		t.Kind = Alias
+		// TODO: recursive method detection?
 	default:
-		return fmt.Errorf("unknown type %v", expr)
+		return errors.Errorf("unknown type %v", expr)
 	}
 
 	if _, ok := pkg.Types[t.Name]; ok {
-		return fmt.Errorf("duplicate type %s", t.Name)
+		return errors.Errorf("duplicate type %s", t.Name)
 	}
 	pkg.Types[t.Name] = t
 
@@ -132,7 +135,7 @@ func parseMethods(methods *ast.FieldList) ([]Method, error) {
 
 	for _, f := range methods.List {
 		if len(f.Names) != 1 {
-			return nil, fmt.Errorf("invalid name in func %v", f)
+			return nil, errors.Errorf("invalid name in func %v", f)
 		}
 		name := f.Names[0].Name
 
@@ -172,7 +175,7 @@ func parseFields(fields *ast.FieldList) ([]Field, error) {
 
 	for _, f := range fields.List {
 		if len(f.Names) > 1 {
-			return nil, fmt.Errorf("ambigious name in field %v", f)
+			return nil, errors.Errorf("ambigious name in field %v", f)
 		}
 
 		name := ""
@@ -180,20 +183,9 @@ func parseFields(fields *ast.FieldList) ([]Field, error) {
 			name = f.Names[0].Name
 		}
 
-		var typeName string
-
-		switch t := f.Type.(type) {
-		case *ast.Ident:
-			typeName = t.Name
-		case *ast.SelectorExpr:
-			typeSel := t.Sel.Name
-			pkgIdent, ok := t.X.(*ast.Ident)
-			if !ok {
-				return nil, fmt.Errorf("expected typename in field %s", name)
-			}
-			typeName = pkgIdent.Name + "." + typeSel
-		default:
-			return nil, fmt.Errorf("expected typename in field %s", name)
+		typeName, err := parseTypeName(f.Type)
+		if err != nil {
+			return nil, err
 		}
 
 		field := Field{
@@ -205,6 +197,29 @@ func parseFields(fields *ast.FieldList) ([]Field, error) {
 	}
 
 	return res, nil
+}
+
+func parseTypeName(expr ast.Expr) (string, error) {
+	switch t := expr.(type) {
+	case *ast.Ident:
+		return t.Name, nil
+	case *ast.SelectorExpr:
+		typeSel := t.Sel.Name
+		pkgIdent, ok := t.X.(*ast.Ident)
+		if !ok {
+			return "", errors.Errorf("expected typename in field %+v", t)
+		}
+		return pkgIdent.Name + "." + typeSel, nil
+	case *ast.StarExpr:
+		prefix := "*"
+		nxt, err := parseTypeName(t.X)
+		if err != nil {
+			return "", err
+		}
+		return prefix + nxt, nil
+	default:
+		return "", errors.Errorf("expected typename in field %+v", t)
+	}
 }
 
 func parseAnnotations(doc *ast.CommentGroup) []Annotation {

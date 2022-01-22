@@ -1,7 +1,7 @@
 package gen
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 	"github.com/rwlist/gjrpc/internal/gen/astinfo"
 	"github.com/rwlist/gjrpc/internal/gen/protog"
 	"github.com/rwlist/gjrpc/internal/gen/router"
@@ -27,7 +27,7 @@ func generateServerRouter(args *genServerRouterArgs) (*jen.File, error) {
 
 	handlers, ok := currentPkg.Types[args.handlersStruct]
 	if !ok {
-		return nil, fmt.Errorf("struct %s not found in current directory", args.handlersStruct)
+		return nil, errors.Errorf("struct %s not found in current directory", args.handlersStruct)
 	}
 
 	names := router.Names{
