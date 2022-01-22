@@ -57,7 +57,7 @@ func (r *Router) handleAuth(path []string, req *jsonrpc.Request) (jsonrpc.Result
 
 func (r *Router) handleAuthOauth(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
 	if len(path) == 0 {
-		res, err := r.handlers.Auth.Oauth()
+		res, err := r.handlers.Auth.Oauth(req.Context)
 		if err != nil {
 			return r.convertError(err)
 		}
@@ -68,7 +68,7 @@ func (r *Router) handleAuthOauth(path []string, req *jsonrpc.Request) (jsonrpc.R
 
 func (r *Router) handleAuthStatus(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
 	if len(path) == 0 {
-		res, err := r.handlers.Auth.Status()
+		res, err := r.handlers.Auth.Status(req.Context)
 		if err != nil {
 			return r.convertError(err)
 		}

@@ -29,6 +29,26 @@ func TestExample1(t *testing.T) {
 	})
 }
 
+func TestExample2(t *testing.T) {
+	exampleDir, err := filepath.Abs("../../examples/2_cookie_oauth/gen_server/gen_router.go")
+	assert.NoError(t, err)
+
+	assertEqualFile(t, exampleDir, func() error {
+		assert.NoError(t, os.Chdir("../../examples/2_cookie_oauth/gen_server"))
+
+		args := &argparse.CliArgs{
+			Command: "gen:server:router",
+			Args: map[string]string{
+				"protoPkg":       "../proto",
+				"handlersStruct": "Handlers",
+				"out":            "gen_router.go",
+			},
+		}
+		FromCmdline(args)
+		return nil
+	})
+}
+
 func assertEqualFile(t *testing.T, path string, genFunc func() error) {
 	before, err := os.ReadFile(path)
 	assert.NoError(t, err)

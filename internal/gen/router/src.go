@@ -158,6 +158,8 @@ func (r *Router) genMethodCall(g *jen.Group, e *endpoint) error {
 		switch param.Type {
 		case "jsonrpc.Request":
 			arguments = append(arguments, jen.Id("req"))
+		case "context.Context":
+			arguments = append(arguments, jen.Id("req").Dot("Context"))
 		default:
 			// TODO: assert compatibility with methodProto
 			if requestType != nil {

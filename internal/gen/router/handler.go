@@ -90,10 +90,14 @@ func newHandlerFromAST(f astinfo2.Field, currentPkg *astinfo2.Package, proto *pr
 }
 
 func lookupUserHandler(currentPkg *astinfo2.Package, proto *protog.Protocol, userType string) (*astinfo2.Type, error) { //nolint:unparam
-	// TODO: implement real lookup
+	// TODO: implement real lookup, even for outer packages
 	serv := proto.FindServiceByGoType(userType)
 	if serv != nil {
 		return serv.Interface, nil
+	}
+
+	if localType, ok := currentPkg.Types[userType]; ok {
+		return localType, nil
 	}
 
 	return nil, fmt.Errorf("type %s not found", userType)
