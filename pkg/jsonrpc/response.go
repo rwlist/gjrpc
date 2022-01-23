@@ -25,6 +25,15 @@ type Response struct {
 	ID ID `json:"id,omitempty"`
 }
 
+func NewResponse(request *Request, result Result, error *Error) *Response {
+	return &Response{
+		Version: "2.0",
+		Result:  result,
+		Error:   error,
+		ID:      request.ID,
+	}
+}
+
 func (r *Response) Validate() error {
 	if r.Result == nil && r.Error == nil {
 		return errEmpty

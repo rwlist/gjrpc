@@ -39,10 +39,6 @@ func (h *HandlerHTTP) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	req.Context = ctx
 
 	res, err := h.Handler(&req)
-	if err != nil {
-		_ = json.NewEncoder(w).Encode(err)
-		return
-	}
-
-	_ = json.NewEncoder(w).Encode(res)
+	resp := jsonrpc.NewResponse(&req, res, err)
+	_ = json.NewEncoder(w).Encode(resp)
 }
