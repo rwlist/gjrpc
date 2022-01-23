@@ -9,6 +9,14 @@ const Version = "2.0"
 
 type ID json.RawMessage
 
+func (id ID) MarshalJSON() ([]byte, error) {
+	return json.RawMessage(id).MarshalJSON()
+}
+
+func (id *ID) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, (*json.RawMessage)(id))
+}
+
 // Request object from specification: https://www.jsonrpc.org/specification
 type Request struct {
 	// MUST be exactly "2.0".
