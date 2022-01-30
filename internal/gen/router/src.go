@@ -166,7 +166,12 @@ func (r *Router) genMethodCall(g *jen.Group, e *endpoint) error {
 				return errors.Errorf("should be exactly one request object, found %s and %s", requestType.GoString(), param.Type)
 			}
 
-			requestType = jen.Qual(r.proto.Package.PkgImportPath, param.Type)
+			if astinfo.IsPrimitive(param.Type) {
+				requestType = jen.Id(param.Type)
+			} else {
+				requestType = jen.Qual(r.proto.Package.PkgImportPath, param.Type)
+			}
+
 			arguments = append(arguments, reqVar)
 		}
 	}

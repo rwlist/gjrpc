@@ -11,5 +11,9 @@ func convertGoType(t string) string {
 		// TODO: handle pointers
 		return "unknown"
 	}
+	if strings.HasPrefix(t, "[]") {
+		// TODO: handle slices
+		return t[2:] + "[]"
+	}
 	return t
 }

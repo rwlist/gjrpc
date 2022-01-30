@@ -1,0 +1,15 @@
+{{- /*gotype: github.com/rwlist/gjrpc/internal/gen/protog.Protocol*/ -}}
+
+export interface API {
+{{- range .Services}}
+    {{.Interface.Name}}: {{.Interface.Name}}
+{{- end}}
+}
+
+export function buildImpl(transport: Transport): API {
+    return {
+    {{- range .Services}}
+        {{.Interface.Name}}: new {{.Interface.Name}}Impl(transport),
+    {{- end}}
+    }
+}

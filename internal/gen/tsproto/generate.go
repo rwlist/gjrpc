@@ -11,6 +11,12 @@ func GenerateSource(proto *protog.Protocol) (string, error) {
 	w := bytes.NewBuffer(nil)
 	_, _ = w.WriteString(tmplHeader)
 
+	_ = w.WriteByte('\n')
+	err := apiTemplate.Execute(w, proto)
+	if err != nil {
+		return "", err
+	}
+
 	for _, s := range proto.Services {
 		_ = w.WriteByte('\n')
 		err := serviceTemplate.Execute(w, s)
@@ -32,6 +38,10 @@ func GenerateSource(proto *protog.Protocol) (string, error) {
 
 //go:embed header.tstmpl
 var tmplHeader string
+
+//go:embed api.tstmpl
+var tmplAPI string
+var apiTemplate = template.Must(template.New("api").Parse(tmplAPI))
 
 //go:embed service.tstmpl
 var tmplService string

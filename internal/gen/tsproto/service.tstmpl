@@ -1,8 +1,13 @@
 {{- /*gotype: github.com/rwlist/gjrpc/internal/gen/protog.Service*/ -}}
 
-export class {{.Interface.Name}} {
-    constructor(private transport: Transport) {}
-    {{range .Methods}}
+export interface {{.Interface.Name}} {
+{{- range $index, $m := .Methods}}
+    {{$m.Method.Name}}({{if $m.ParamsType}}params: {{$m.ParamsType}}{{end}}): Promise<{{if $m.ResultType}}{{$m.ResultType}}{{else}}unknown{{end}}>
+{{- end}}
+}
+
+export class {{.Interface.Name}}Impl implements {{.Interface.Name}} {
+    constructor(private transport: Transport) {}{{range .Methods}}
 
     async {{.Method.Name}}({{if .ParamsType}}params: {{.ParamsType}}{{end}}): Promise<{{if .ResultType}}{{.ResultType}}{{else}}unknown{{end}}> {
         return await this.transport.request("{{.FullPath}}", {{if .ParamsType}}params{{else}}null{{end}}){{if .ResultType}} as {{.ResultType}}{{end}};

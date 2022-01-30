@@ -207,7 +207,7 @@ func parseTypeName(expr ast.Expr) (string, error) {
 		typeSel := t.Sel.Name
 		pkgIdent, ok := t.X.(*ast.Ident)
 		if !ok {
-			return "", errors.Errorf("expected typename in field %+v", t)
+			return "", errors.Errorf("expected typename in field %#v", t)
 		}
 		return pkgIdent.Name + "." + typeSel, nil
 	case *ast.StarExpr:
@@ -220,8 +220,15 @@ func parseTypeName(expr ast.Expr) (string, error) {
 	case *ast.FuncType:
 		// TODO: handle params and results
 		return "func (...) (...)", nil
+	case *ast.ArrayType:
+		prefix := "[]"
+		nxt, err := parseTypeName(t.Elt)
+		if err != nil {
+			return "", err
+		}
+		return prefix + nxt, nil
 	default:
-		return "", errors.Errorf("expected typename in field %+v", t)
+		return "", errors.Errorf("expected typename in field %#v", t)
 	}
 }
 
