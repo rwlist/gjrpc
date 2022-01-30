@@ -30,11 +30,14 @@ func TestExample1(t *testing.T) {
 }
 
 func TestExample2(t *testing.T) {
-	exampleDir, err := filepath.Abs("../../examples/2_cookie_oauth/gen_server/gen_router.go")
+	routerGenGo, err := filepath.Abs("../../examples/2_cookie_oauth/gen_server/gen_router.go")
 	assert.NoError(t, err)
 
-	assertEqualFile(t, exampleDir, func() error {
-		assert.NoError(t, os.Chdir("../../examples/2_cookie_oauth/gen_server"))
+	protoTs, err := filepath.Abs("../../examples/2_cookie_oauth/gen_client/proto.ts")
+	assert.NoError(t, err)
+
+	assertEqualFile(t, routerGenGo, func() error {
+		assert.NoError(t, os.Chdir(filepath.Dir(routerGenGo)))
 
 		args := &argparse.CliArgs{
 			Command: "gen:server:router",
@@ -42,6 +45,20 @@ func TestExample2(t *testing.T) {
 				"protoPkg":       "../proto",
 				"handlersStruct": "Handlers",
 				"out":            "gen_router.go",
+			},
+		}
+		FromCmdline(args)
+		return nil
+	})
+
+	assertEqualFile(t, protoTs, func() error {
+		assert.NoError(t, os.Chdir(filepath.Dir(protoTs)))
+
+		args := &argparse.CliArgs{
+			Command: "gen:client:ts-proto",
+			Args: map[string]string{
+				"protoPkg": "../proto",
+				"out":      "proto.ts",
 			},
 		}
 		FromCmdline(args)

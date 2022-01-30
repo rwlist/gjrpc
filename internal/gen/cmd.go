@@ -14,6 +14,12 @@ func FromCmdline(args *argparse.CliArgs) {
 			fmt.Printf("Error happened, %+v", err)
 			os.Exit(1)
 		}
+	case "gen:client:ts-proto":
+		err := cmdClientTsProto(args.Args)
+		if err != nil {
+			fmt.Printf("Error happened, %+v", err)
+			os.Exit(1)
+		}
 	default:
 		fmt.Printf("Unknown command \"%s\"\n", args.Command)
 		os.Exit(1)
@@ -34,4 +40,18 @@ func cmdServerRouter(args map[string]string) error {
 	}
 
 	return renderToFile(src, out)
+}
+
+func cmdClientTsProto(args map[string]string) error {
+	protoPkg := extractByKey(args, "protoPkg")
+	out := extractByKey(args, "out")
+
+	src, err := generateTypescriptProto(&genTypescriptProtoArgs{
+		protoPkg: protoPkg,
+	})
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(out, []byte(src), defaultSrcPerm)
 }

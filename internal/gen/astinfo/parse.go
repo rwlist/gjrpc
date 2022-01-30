@@ -217,6 +217,9 @@ func parseTypeName(expr ast.Expr) (string, error) {
 			return "", err
 		}
 		return prefix + nxt, nil
+	case *ast.FuncType:
+		// TODO: handle params and results
+		return "func (...) (...)", nil
 	default:
 		return "", errors.Errorf("expected typename in field %+v", t)
 	}

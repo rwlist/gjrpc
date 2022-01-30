@@ -2,47 +2,21 @@ package protog
 
 import (
 	"github.com/pkg/errors"
-	astinfo2 "github.com/rwlist/gjrpc/internal/gen/astinfo"
+	"github.com/rwlist/gjrpc/internal/gen/astinfo"
 )
 
-// Parse protocol definition located in specified directory.
-func Parse(path string) (*Protocol, error) {
-	pkg, err := astinfo2.ParseDir(path)
-	if err != nil {
-		return nil, err
-	}
-
-	ptypes := map[string]ProtocolType{}
-	var services []Service
-	for name, t := range pkg.Types {
-		serv, err := parseService(t)
-		if err != nil {
-			return nil, err
-		}
-
-		ptype := ProtocolType{}
-		if serv != nil {
-			services = append(services, *serv)
-			ptype.Service = serv
-		}
-
-		ptypes[name] = ptype
-	}
-
-	proto := &Protocol{
-		Package:  pkg,
-		Services: services,
-		Types:    ptypes,
-	}
-	return proto, nil
+type Service struct {
+	Path      []string
+	Interface *astinfo.Type
+	Methods   []Method
 }
 
-func parseService(info *astinfo2.Type) (*Service, error) {
-	if info.Kind != astinfo2.Interface {
+func parseService(info *astinfo.Type) (*Service, error) {
+	if info.Kind != astinfo.Interface {
 		return nil, nil
 	}
 
-	var serviceAnno *astinfo2.Annotation
+	var serviceAnno *astinfo.Annotation
 	for _, anno := range info.Annotations {
 		switch anno.Key {
 		case "gjrpc:service":
@@ -64,6 +38,8 @@ func parseService(info *astinfo2.Type) (*Service, error) {
 		return nil, errors.Errorf("invalid annotation %s on type %s", serviceAnno.Key, info.Name)
 	}
 
+	servicePath := StringToPath(serviceAnno.Values[0])
+
 	var methods []Method
 	for _, astMethod := range info.Methods {
 		astMethod := astMethod
@@ -75,18 +51,27 @@ func parseService(info *astinfo2.Type) (*Service, error) {
 			return nil, errors.Errorf("method %s.%s has no valid annotations", info.Name, astMethod.Name)
 		}
 
+		method.FullPath = PathToString(PathAppend(servicePath, method.Path...))
 		methods = append(methods, *method)
 	}
 
 	return &Service{
-		Path:      StringToPath(serviceAnno.Values[0]),
+		Path:      servicePath,
 		Interface: info,
 		Methods:   methods,
 	}, nil
 }
 
-func parseMethod(method *astinfo2.Method) (*Method, error) {
-	var methodAnno *astinfo2.Annotation
+type Method struct {
+	Path       []string
+	FullPath   string
+	Method     *astinfo.Method
+	ParamsType string
+	ResultType string
+}
+
+func parseMethod(method *astinfo.Method) (*Method, error) {
+	var methodAnno *astinfo.Annotation
 	for _, anno := range method.Annotations {
 		switch anno.Key {
 		case "gjrpc:method":
@@ -108,8 +93,29 @@ func parseMethod(method *astinfo2.Method) (*Method, error) {
 		return nil, errors.Errorf("invalid annotation %s on method %s", methodAnno.Key, method.Name)
 	}
 
+	paramsType := ""
+	if len(method.Params) != 0 {
+		if len(method.Params) != 1 {
+			return nil, errors.Errorf("method %s has more than one parameter, only single params objects is supported", method.Name)
+		}
+		paramsType = method.Params[0].Type
+	}
+
+	resultType := ""
+	if len(method.Results) > 2 || len(method.Results) < 1 {
+		return nil, errors.Errorf("method %s has more than two results, only single result object and error is supported", method.Name)
+	}
+	if method.Results[len(method.Results)-1].Type != "error" {
+		return nil, errors.Errorf("method %s must have error as the last result parameter", method.Name)
+	}
+	if len(method.Results) == 2 {
+		resultType = method.Results[0].Type
+	}
+
 	return &Method{
-		Path:   StringToPath(methodAnno.Values[0]),
-		Method: method,
+		Path:       StringToPath(methodAnno.Values[0]),
+		Method:     method,
+		ParamsType: paramsType,
+		ResultType: resultType,
 	}, nil
 }

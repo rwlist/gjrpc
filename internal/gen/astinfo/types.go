@@ -12,8 +12,12 @@ type Type struct {
 	Name        string
 	Kind        Kind
 	Annotations []Annotation
-	Fields      []Field
-	Methods     []Method
+
+	// only for Struct
+	Fields []Field
+
+	// only for Interface
+	Methods []Method
 }
 
 type Annotation struct {

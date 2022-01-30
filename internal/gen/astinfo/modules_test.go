@@ -14,5 +14,5 @@ func TestFindPackagePath(t *testing.T) {
 	path, err := findPackagePath(wd)
 	assert.NoError(t, err)
 
-	assert.Equal(t, "github.com/rwlist/gjrpc/pkg/gen/astinfo", path)
+	assert.Equal(t, "github.com/rwlist/gjrpc/internal/gen/astinfo", path)
 }

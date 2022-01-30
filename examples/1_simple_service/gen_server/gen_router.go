@@ -16,19 +16,23 @@ type Router struct {
 func NewRouter(handlers Handlers) *Router {
 	return &Router{handlers: handlers}
 }
+
 func (r *Router) convertError(err error) (jsonrpc.Result, *jsonrpc.Error) {
 	return nil, &jsonrpc.Error{
 		Code:    1,
 		Message: err.Error(),
 	}
 }
+
 func (r *Router) notFound() (jsonrpc.Result, *jsonrpc.Error) {
 	return nil, &jsonrpc.MethodNotFound
 }
+
 func (r *Router) Handle(req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
 	path := strings.Split(req.Method, ".")
 	return r.handle(path, req)
 }
+
 func (r *Router) handle(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
 	if len(path) == 0 {
 		return r.notFound()
@@ -39,6 +43,7 @@ func (r *Router) handle(path []string, req *jsonrpc.Request) (jsonrpc.Result, *j
 	}
 	return r.notFound()
 }
+
 func (r *Router) handleInventory(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
 	if len(path) == 0 {
 		return r.notFound()
@@ -51,6 +56,7 @@ func (r *Router) handleInventory(path []string, req *jsonrpc.Request) (jsonrpc.R
 	}
 	return r.notFound()
 }
+
 func (r *Router) handleInventoryBar(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
 	if len(path) == 0 {
 		var request proto.Bar
@@ -65,6 +71,7 @@ func (r *Router) handleInventoryBar(path []string, req *jsonrpc.Request) (jsonrp
 	}
 	return r.notFound()
 }
+
 func (r *Router) handleInventoryFoo(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
 	if len(path) == 0 {
 		res, err := r.handlers.Inventory.Foo()
