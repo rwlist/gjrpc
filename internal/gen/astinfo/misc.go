@@ -2,7 +2,7 @@ package astinfo
 
 const annotationPrefix = "gjrpc:"
 
-func IsPrimitive(t string) bool {
+func IsPrimitive(t string) bool { //nolint:gocyclo
 	// all primitives are located inside src/builtin/builtin.go
 	switch t {
 	case "bool":

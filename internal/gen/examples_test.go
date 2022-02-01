@@ -1,20 +1,28 @@
 package gen
 
 import (
-	"github.com/rwlist/gjrpc/internal/gen/argparse"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
+
+	"github.com/rwlist/gjrpc/internal/gen/argparse"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestExample1(t *testing.T) {
-	exampleDir, err := filepath.Abs("../../examples/1_simple_service/gen_server/gen_router.go")
-	assert.NoError(t, err)
+var (
+	_, b, _, _ = runtime.Caller(0)
 
-	assertEqualFile(t, exampleDir, func() error {
-		assert.NoError(t, os.Chdir("../../examples/1_simple_service/gen_server"))
+	// examples directory
+	examplesDir = filepath.Join(filepath.Dir(b), "../../examples")
+)
+
+func TestExample1(t *testing.T) {
+	genFile := filepath.Join(examplesDir, "1_simple_service/gen_server/gen_router.go")
+
+	assertEqualFile(t, genFile, func() error {
+		assert.NoError(t, os.Chdir(filepath.Dir(genFile)))
 
 		args := &argparse.CliArgs{
 			Command: "gen:server:router",
@@ -30,11 +38,8 @@ func TestExample1(t *testing.T) {
 }
 
 func TestExample2(t *testing.T) {
-	routerGenGo, err := filepath.Abs("../../examples/2_cookie_oauth/gen_server/gen_router.go")
-	assert.NoError(t, err)
-
-	protoTs, err := filepath.Abs("../../examples/2_cookie_oauth/gen_client/proto.ts")
-	assert.NoError(t, err)
+	routerGenGo := filepath.Join(examplesDir, "2_cookie_oauth/gen_server/gen_router.go")
+	protoTs := filepath.Join(examplesDir, "2_cookie_oauth/gen_client/proto.ts")
 
 	assertEqualFile(t, routerGenGo, func() error {
 		assert.NoError(t, os.Chdir(filepath.Dir(routerGenGo)))

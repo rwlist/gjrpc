@@ -1,8 +1,9 @@
 package argparse
 
 import (
-	"github.com/pkg/errors"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 type CliArgs struct {
@@ -31,7 +32,7 @@ func ParseCliArgs(args []string) (*CliArgs, error) {
 		if len(kv) == 1 {
 			kv = append(kv, "")
 		}
-		if len(kv) != 2 { //nolint:gomnd
+		if len(kv) != 2 {
 			return nil, errors.Errorf("invalid argument found \"%s\"", arg)
 		}
 		key, value := kv[0], kv[1]

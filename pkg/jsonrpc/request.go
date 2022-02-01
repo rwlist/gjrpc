@@ -34,9 +34,7 @@ type Request struct {
 	// or NULL value if included.
 	ID ID `json:"id"`
 
-	// TODO: should Authorization stay here?
-	//// Authorization header from HTTP request.
-	//Authorization string `json:"-"`
+	// TODO: should we add Authorization from http header, or context is enough?
 
 	// Context with additional metadata for the request.
 	Context context.Context `json:"-"`

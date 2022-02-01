@@ -2,10 +2,11 @@ package router
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/pkg/errors"
 	astinfo2 "github.com/rwlist/gjrpc/internal/gen/astinfo"
 	"github.com/rwlist/gjrpc/internal/gen/protog"
-	"os"
 )
 
 type handler struct {
@@ -90,7 +91,7 @@ func newHandlerFromAST(f astinfo2.Field, currentPkg *astinfo2.Package, proto *pr
 	}, nil
 }
 
-func lookupUserHandler(currentPkg *astinfo2.Package, proto *protog.Protocol, userType string) (*astinfo2.Type, error) { //nolint:unparam
+func lookupUserHandler(currentPkg *astinfo2.Package, proto *protog.Protocol, userType string) (*astinfo2.Type, error) {
 	// TODO: implement real lookup, even for outer packages
 	serv := proto.FindServiceByGoType(userType)
 	if serv != nil {

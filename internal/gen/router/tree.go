@@ -1,9 +1,10 @@
 package router
 
 import (
+	"sort"
+
 	"github.com/pkg/errors"
 	"github.com/rwlist/gjrpc/internal/gen/protog"
-	"sort"
 )
 
 func newTree(handlers []*handler, endpoints []endpoint) (*node, error) {

@@ -2,9 +2,10 @@ package jsonrpc
 
 import (
 	"encoding/json"
+	"testing"
+
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestRequestUnmarshal(t *testing.T) {

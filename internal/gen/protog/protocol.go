@@ -1,8 +1,9 @@
 package protog
 
 import (
-	astinfo2 "github.com/rwlist/gjrpc/internal/gen/astinfo"
 	"strings"
+
+	astinfo2 "github.com/rwlist/gjrpc/internal/gen/astinfo"
 )
 
 type Protocol struct {

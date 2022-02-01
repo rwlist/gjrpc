@@ -3,8 +3,9 @@ package gjserver
 import (
 	"context"
 	"encoding/json"
-	"github.com/rwlist/gjrpc/pkg/jsonrpc"
 	"net/http"
+
+	"github.com/rwlist/gjrpc/pkg/jsonrpc"
 )
 
 type ctxKey string

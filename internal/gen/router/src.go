@@ -1,10 +1,11 @@
 package router
 
 import (
+	"strings"
+
 	"github.com/pkg/errors"
 	"github.com/rwlist/gjrpc/internal/gen/astinfo"
 	"github.com/rwlist/gjrpc/internal/gen/protog"
-	"strings"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -62,7 +63,7 @@ func (r *Router) genStruct(f *jen.File) {
 		jen.Id(r.HandlersField).Id(r.HandlersType),
 		jen.Id(r.ErrorConverterField).Qual(r.JsonrpcPkg, "ErrorConverter"),
 	)
-	//type Router struct {
+	// type Router struct {
 	//	handlers Handlers
 	//	convertError jsonrpc.ErrorConverter
 	//}
@@ -81,7 +82,7 @@ func (r *Router) genConstructor(f *jen.File) {
 			jen.Id(r.ErrorConverterField): jen.Id(r.ErrorConverterField),
 		}),
 	)
-	//func NewRouter(handlers Handlers, convertError jsonrpc.ErrorConverter) *Router {
+	// func NewRouter(handlers Handlers, convertError jsonrpc.ErrorConverter) *Router {
 	//	if convertError == nil {
 	//	  convertError = jsonrpc.DefaultErrorConverter
 	//  }
@@ -99,7 +100,7 @@ func (r *Router) genMainHandle(f *jen.File) {
 		jen.Id("path").Op(":=").Qual("strings", "Split").Call(jen.Id("req").Dot("Method"), jen.Lit(".")),
 		jen.Return().Id("r").Dot("handle").Call(jen.Id("path"), jen.Id("req")),
 	)
-	//func (r *Router) Handle(req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
+	// func (r *Router) Handle(req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
 	//	path := strings.Split(req.Method, ".")
 	//	return r.handle(path, req)
 	//}
@@ -110,7 +111,7 @@ func (r *Router) genNotFound(f *jen.File) {
 		jen.Nil(),
 		jen.Op("&").Qual(r.JsonrpcPkg, "MethodNotFound"),
 	))
-	//func (r *Router) notFound() (jsonrpc.Result, *jsonrpc.Error) {
+	// func (r *Router) notFound() (jsonrpc.Result, *jsonrpc.Error) {
 	//	return nil, jsonrpc.MethodNotFound
 	//}
 }
@@ -180,8 +181,8 @@ func (r *Router) genMethodCall(g *jen.Group, e *endpoint) error {
 		).Block(
 			jen.Return().Id("r").Dot(r.ErrorConverterField).Call(jen.Err()),
 		)
-		//var req SomeRequest
-		//if err = json.Unmarshal(params, &req); err != nil {
+		// var req SomeRequest
+		// if err = json.Unmarshal(params, &req); err != nil {
 		//	return r.convertError(err)
 		//}
 	}
@@ -225,7 +226,7 @@ func (r *Router) genMethodCall(g *jen.Group, e *endpoint) error {
 	g.If(jen.Id(errVar).Op("!=").Nil()).Block(
 		jen.Return(jen.Id("r").Dot(r.ErrorConverterField).Call(jen.Id(errVar))),
 	)
-	//if err != nil {
+	// if err != nil {
 	//	return r.convertError(err)
 	//}
 

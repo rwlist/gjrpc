@@ -3,8 +3,9 @@ package tsproto
 import (
 	"bytes"
 	_ "embed"
-	"github.com/rwlist/gjrpc/internal/gen/protog"
 	"text/template"
+
+	"github.com/rwlist/gjrpc/internal/gen/protog"
 )
 
 func GenerateSource(proto *protog.Protocol) (string, error) {

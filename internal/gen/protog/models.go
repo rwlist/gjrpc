@@ -15,7 +15,7 @@ type Field struct {
 	AstField *astinfo.Field
 }
 
-func parseModel(info *astinfo.Type) (*Model, error) {
+func parseModel(info *astinfo.Type) (*Model, error) { //nolint:unparam
 	if info.Kind != astinfo.Struct {
 		return nil, nil
 	}

@@ -2,11 +2,12 @@ package astinfo
 
 import (
 	"bytes"
-	"github.com/pkg/errors"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // A Dir describes a directory holding code by specifying

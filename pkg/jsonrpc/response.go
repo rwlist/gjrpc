@@ -25,11 +25,11 @@ type Response struct {
 	ID ID `json:"id,omitempty"`
 }
 
-func NewResponse(request *Request, result Result, error *Error) *Response {
+func NewResponse(request *Request, result Result, err *Error) *Response {
 	return &Response{
 		Version: "2.0",
 		Result:  result,
-		Error:   error,
+		Error:   err,
 		ID:      request.ID,
 	}
 }

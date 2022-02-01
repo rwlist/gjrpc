@@ -1,13 +1,14 @@
 package astinfo
 
 import (
-	"github.com/pkg/errors"
 	"go/ast"
 	"go/build"
 	"go/parser"
 	"go/token"
 	"path/filepath"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 type Package struct {
