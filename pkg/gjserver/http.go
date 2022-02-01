@@ -11,11 +11,20 @@ import (
 type ctxKey string
 
 const (
-	ctxHttpRequest = ctxKey("http.Request")
+	ctxHttpRequest  = ctxKey("http.Request")
+	ctxHttpResponse = ctxKey("http.ResponseWriter")
 )
 
 func HttpRequest(ctx context.Context) *http.Request {
 	v, ok := ctx.Value(ctxHttpRequest).(*http.Request)
+	if !ok {
+		return nil
+	}
+	return v
+}
+
+func HttpResponse(ctx context.Context) http.ResponseWriter {
+	v, ok := ctx.Value(ctxHttpResponse).(http.ResponseWriter)
 	if !ok {
 		return nil
 	}
@@ -29,7 +38,9 @@ type HandlerHTTP struct {
 }
 
 func (h *HandlerHTTP) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	ctx := context.WithValue(r.Context(), ctxHttpRequest, r)
+	ctx := r.Context()
+	ctx = context.WithValue(ctx, ctxHttpRequest, r)
+	ctx = context.WithValue(ctx, ctxHttpResponse, w)
 
 	var req jsonrpc.Request
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

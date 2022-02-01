@@ -1,6 +1,8 @@
 package protog
 
 import (
+	"sort"
+
 	astinfo2 "github.com/rwlist/gjrpc/internal/gen/astinfo"
 )
 
@@ -36,6 +38,14 @@ func Parse(path string) (*Protocol, error) {
 
 		ptypes[name] = ptype
 	}
+
+	sort.Slice(services, func(i, j int) bool {
+		return services[i].Interface.Name < services[j].Interface.Name
+	})
+
+	sort.Slice(models, func(i, j int) bool {
+		return models[i].Struct.Name < models[j].Struct.Name
+	})
 
 	proto := &Protocol{
 		Package:  pkg,
