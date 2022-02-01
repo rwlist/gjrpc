@@ -31,10 +31,10 @@ export class AuthImpl implements Auth {
     }
 }
 
-export interface OAuthResponse {
-    RedirectURL: string
-}
-
 export interface AuthStatus {
     Email: string
+}
+
+export interface OAuthResponse {
+    RedirectURL: string
 }
