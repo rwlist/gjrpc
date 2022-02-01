@@ -125,6 +125,10 @@ issues:
       text: "commentFormatting"
       linters:
         - gocritic
+    - path: ".+_test.go"
+      text: "filepathJoin"
+      linters:
+        - gocritic
 
 run:
   skip-dirs:
