@@ -21,3 +21,4 @@
 *.tar
 
 status.txt
+coverage.txt
