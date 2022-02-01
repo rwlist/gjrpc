@@ -21,8 +21,6 @@ func (r *Router) GenerateSrc() (*jen.File, error) {
 	f.Line()
 	r.genConstructor(f)
 	f.Line()
-	r.genConvertError(f)
-	f.Line()
 	r.genNotFound(f)
 	f.Line()
 	r.genMainHandle(f)
@@ -62,23 +60,34 @@ func (r *Router) GenerateSrc() (*jen.File, error) {
 func (r *Router) genStruct(f *jen.File) {
 	f.Type().Id(r.StructName).Struct(
 		jen.Id(r.HandlersField).Id(r.HandlersType),
+		jen.Id(r.ErrorConverterField).Qual(r.JsonrpcPkg, "ErrorConverter"),
 	)
 	//type Router struct {
 	//	handlers Handlers
+	//	convertError jsonrpc.ErrorConverter
 	//}
 }
 
 func (r *Router) genConstructor(f *jen.File) {
 	f.Func().Id(r.ConstructorName).Params(
 		jen.Id(r.HandlersField).Id(r.HandlersType),
-	).Op("*").Id(r.StructName).Block(
+		jen.Id(r.ErrorConverterField).Qual(r.JsonrpcPkg, "ErrorConverter"),
+	).Params(jen.Op("*").Id(r.StructName)).Block(
+		jen.If(jen.Id(r.ErrorConverterField).Op("==").Nil()).Block(
+			jen.Id(r.ErrorConverterField).Op("=").Qual(r.JsonrpcPkg, "DefaultErrorConverter"),
+		),
 		jen.Return().Op("&").Id(r.StructName).Values(jen.Dict{
-			jen.Id(r.HandlersField): jen.Id(r.HandlersField),
+			jen.Id(r.HandlersField):       jen.Id(r.HandlersField),
+			jen.Id(r.ErrorConverterField): jen.Id(r.ErrorConverterField),
 		}),
 	)
-	//func NewRouter(handlers Handlers) *Router {
+	//func NewRouter(handlers Handlers, convertError jsonrpc.ErrorConverter) *Router {
+	//	if convertError == nil {
+	//	  convertError = jsonrpc.DefaultErrorConverter
+	//  }
 	//	return &Router{
-	//		handlers: handlers,
+	//	  handlers: handlers,
+	//	  convertError: convertError,
 	//	}
 	//}
 }
@@ -93,22 +102,6 @@ func (r *Router) genMainHandle(f *jen.File) {
 	//func (r *Router) Handle(req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
 	//	path := strings.Split(req.Method, ".")
 	//	return r.handle(path, req)
-	//}
-}
-
-func (r *Router) genConvertError(f *jen.File) {
-	r.methodHandle(f, "convertError",
-		jen.Err().Error(),
-	).Block(jen.Return(
-		jen.Nil(),
-
-		jen.Op("&").Qual(r.JsonrpcPkg, "Error").Values(jen.Dict{
-			jen.Id("Code"):    jen.Lit(1), // TODO: custom errors
-			jen.Id("Message"): jen.Err().Dot("Error").Call(),
-		}),
-	))
-	//func (r *Router) convertError(err error) (jsonrpc.Result, *jsonrpc.Error) {
-	//	return nil, jsonrpc.Error{Code: 1, Message: err.Error()}
 	//}
 }
 
@@ -185,7 +178,7 @@ func (r *Router) genMethodCall(g *jen.Group, e *endpoint) error {
 			),
 			jen.Err().Op("!=").Nil(),
 		).Block(
-			jen.Return().Id("r").Dot("convertError").Call(jen.Err()),
+			jen.Return().Id("r").Dot(r.ErrorConverterField).Call(jen.Err()),
 		)
 		//var req SomeRequest
 		//if err = json.Unmarshal(params, &req); err != nil {
@@ -230,7 +223,7 @@ func (r *Router) genMethodCall(g *jen.Group, e *endpoint) error {
 	// res, err := r.Handlers.Inventory.Foo(request)
 
 	g.If(jen.Id(errVar).Op("!=").Nil()).Block(
-		jen.Return(jen.Id("r").Dot("convertError").Call(jen.Id(errVar))),
+		jen.Return(jen.Id("r").Dot(r.ErrorConverterField).Call(jen.Id(errVar))),
 	)
 	//if err != nil {
 	//	return r.convertError(err)

@@ -25,7 +25,7 @@ func (i *inventoryImpl) Bar(proto.Bar) error {
 
 func TestRouter(t *testing.T) {
 	impl := &inventoryImpl{}
-	router := NewRouter(Handlers{Inventory: impl})
+	router := NewRouter(Handlers{Inventory: impl}, nil)
 
 	type testcase struct {
 		method  string

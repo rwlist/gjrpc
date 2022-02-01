@@ -7,12 +7,13 @@ import (
 )
 
 type Names struct {
-	StructName      string
-	ConstructorName string
-	HandlersField   string
-	HandlersType    string
-	R               string
-	JsonrpcPkg      string
+	StructName          string
+	ConstructorName     string
+	HandlersField       string
+	HandlersType        string
+	ErrorConverterField string
+	R                   string
+	JsonrpcPkg          string
 }
 
 type Router struct {

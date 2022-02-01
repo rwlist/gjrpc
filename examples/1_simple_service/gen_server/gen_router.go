@@ -10,17 +10,17 @@ import (
 )
 
 type Router struct {
-	handlers Handlers
+	handlers     Handlers
+	convertError jsonrpc.ErrorConverter
 }
 
-func NewRouter(handlers Handlers) *Router {
-	return &Router{handlers: handlers}
-}
-
-func (r *Router) convertError(err error) (jsonrpc.Result, *jsonrpc.Error) {
-	return nil, &jsonrpc.Error{
-		Code:    1,
-		Message: err.Error(),
+func NewRouter(handlers Handlers, convertError jsonrpc.ErrorConverter) *Router {
+	if convertError == nil {
+		convertError = jsonrpc.DefaultErrorConverter
+	}
+	return &Router{
+		convertError: convertError,
+		handlers:     handlers,
 	}
 }
 

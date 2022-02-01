@@ -31,12 +31,13 @@ func generateServerRouter(args *genServerRouterArgs) (*jen.File, error) {
 	}
 
 	names := router.Names{
-		StructName:      "Router",
-		ConstructorName: "NewRouter",
-		HandlersField:   "handlers",
-		HandlersType:    args.handlersStruct,
-		R:               "r",
-		JsonrpcPkg:      "github.com/rwlist/gjrpc/pkg/jsonrpc",
+		StructName:          "Router",
+		ConstructorName:     "NewRouter",
+		HandlersField:       "handlers",
+		HandlersType:        args.handlersStruct,
+		ErrorConverterField: "convertError",
+		R:                   "r",
+		JsonrpcPkg:          "github.com/rwlist/gjrpc/pkg/jsonrpc",
 	}
 
 	route, err := router.NewRouter(proto, currentPkg, handlers, &names)
