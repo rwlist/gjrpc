@@ -91,18 +91,34 @@ func newHandlerFromAST(f astinfo2.Field, currentPkg *astinfo2.Package, proto *pr
 	}, nil
 }
 
-func lookupUserHandler(currentPkg *astinfo2.Package, proto *protog.Protocol, userType string) (*astinfo2.Type, error) {
+func lookupUserHandler(currentPkg *astinfo2.Package, proto *protog.Protocol, typeRef *astinfo2.TypeRef) (*astinfo2.TypeDecl, error) {
 	// TODO: implement real lookup, even for outer packages
-	serv := proto.FindServiceByGoType(userType)
-	if serv != nil {
-		return serv.Interface, nil
+	if typeRef.RefKind != astinfo2.RefRef {
+		return nil, errors.Errorf("trying to lookup type with ref kind %s, this makes no sense", typeRef.RefKind)
 	}
 
-	if localType, ok := currentPkg.Types[userType]; ok {
-		return localType, nil
+	if proto.Package.PkgName == typeRef.ExternalPkg {
+		serv := proto.FindServiceByGoType(typeRef.Name)
+		if serv != nil {
+			return serv.Interface, nil
+		} else {
+			return nil, errors.Errorf("service %s not found in proto package (%s)", typeRef.Name, proto.Package.PkgName)
+		}
 	}
 
-	return nil, errors.Errorf("type %s not found", userType)
+	if typeRef.ExternalPkg == "" {
+		if localType, ok := currentPkg.Types[typeRef.Name]; ok {
+			return localType, nil
+		} else {
+			return nil, errors.Errorf("type %s not found in current package %s", typeRef.Name, currentPkg.PkgName)
+		}
+	}
+
+	if typeRef.ExternalPkg != "" {
+		return nil, errors.Errorf("trying to lookup type in package %s, can't do that yet", typeRef.ExternalPkg)
+	}
+
+	return nil, errors.Errorf("type %s not found", typeRef.Name)
 }
 
 type userHandler struct {
@@ -117,7 +133,7 @@ type methodImpl struct {
 	methodProto *protog.Method
 }
 
-func prepareUserHandler(handler string, userAST *astinfo2.Type) (*userHandler, error) { //nolint:unparam
+func prepareUserHandler(handler string, userAST *astinfo2.TypeDecl) (*userHandler, error) { //nolint:unparam
 	uh := &userHandler{
 		methods: map[string]*methodImpl{},
 	}

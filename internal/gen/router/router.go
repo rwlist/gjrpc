@@ -26,7 +26,7 @@ type Router struct {
 	Names
 }
 
-func NewRouter(proto *protog.Protocol, currentPkg *astinfo2.Package, handlersStruct *astinfo2.Type, names *Names) (*Router, error) {
+func NewRouter(proto *protog.Protocol, currentPkg *astinfo2.Package, handlersStruct *astinfo2.TypeDecl, names *Names) (*Router, error) {
 	if handlersStruct.Kind != astinfo2.Struct {
 		return nil, errors.Errorf("%s must be struct", handlersStruct.Name)
 	}

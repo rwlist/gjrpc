@@ -15,7 +15,7 @@ type Package struct {
 	Build         *build.Package
 	PkgImportPath string
 	PkgName       string
-	Types         map[string]*Type
+	Types         map[string]*TypeDecl
 }
 
 func ParseDir(path string) (*Package, error) {
@@ -50,7 +50,7 @@ func ParsePkg(pkg *ast.Package, buildPkg *build.Package) (*Package, error) {
 	res := &Package{
 		Build:   buildPkg,
 		PkgName: pkg.Name,
-		Types:   map[string]*Type{},
+		Types:   map[string]*TypeDecl{},
 	}
 
 	importPath, err := findPackagePath(buildPkg.Dir)
@@ -93,7 +93,7 @@ func parseFile(pkg *Package, src *ast.File) error {
 }
 
 func parseType(pkg *Package, s *ast.TypeSpec, doc *ast.CommentGroup) error {
-	t := &Type{
+	t := &TypeDecl{
 		Name:        s.Name.Name,
 		Annotations: parseAnnotations(doc),
 	}
@@ -102,21 +102,21 @@ func parseType(pkg *Package, s *ast.TypeSpec, doc *ast.CommentGroup) error {
 	switch expr := s.Type.(type) {
 	case *ast.StructType:
 		t.Kind = Struct
-		t.Fields, err = parseFields(expr.Fields)
+		t.Fields, err = parseFields(pkg, expr.Fields)
 		if err != nil {
 			return err
 		}
 	case *ast.InterfaceType:
 		t.Kind = Interface
-		t.Methods, err = parseMethods(expr.Methods)
+		t.Methods, err = parseMethods(pkg, expr.Methods)
 		if err != nil {
 			return err
 		}
 	case *ast.Ident:
 		t.Kind = Alias
-		t.Alias = expr.Name
-		// TODO: recursive method detection?
+		t.Alias, err = parseTypeRef(pkg, expr)
 	default:
+		// TODO: parse type ref here also?
 		return errors.Errorf("unknown type %v", expr)
 	}
 
@@ -128,7 +128,7 @@ func parseType(pkg *Package, s *ast.TypeSpec, doc *ast.CommentGroup) error {
 	return nil
 }
 
-func parseMethods(methods *ast.FieldList) ([]Method, error) {
+func parseMethods(pkg *Package, methods *ast.FieldList) ([]Method, error) {
 	if methods == nil {
 		return nil, nil
 	}
@@ -146,12 +146,12 @@ func parseMethods(methods *ast.FieldList) ([]Method, error) {
 			continue
 		}
 
-		args, err := parseFields(fun.Params)
+		args, err := parseFields(pkg, fun.Params)
 		if err != nil {
 			return nil, err
 		}
 
-		results, err := parseFields(fun.Results)
+		results, err := parseFields(pkg, fun.Results)
 		if err != nil {
 			return nil, err
 		}
@@ -168,7 +168,7 @@ func parseMethods(methods *ast.FieldList) ([]Method, error) {
 	return res, nil
 }
 
-func parseFields(fields *ast.FieldList) ([]Field, error) {
+func parseFields(pkg *Package, fields *ast.FieldList) ([]Field, error) {
 	if fields == nil {
 		return nil, nil
 	}
@@ -185,14 +185,14 @@ func parseFields(fields *ast.FieldList) ([]Field, error) {
 			name = f.Names[0].Name
 		}
 
-		typeName, err := parseTypeName(f.Type)
+		typeRef, err := parseTypeRef(pkg, f.Type)
 		if err != nil {
 			return nil, err
 		}
 
 		field := Field{
 			Name:        name,
-			Type:        typeName,
+			Type:        typeRef,
 			Annotations: parseAnnotations(f.Doc),
 		}
 		res = append(res, field)
@@ -201,36 +201,86 @@ func parseFields(fields *ast.FieldList) ([]Field, error) {
 	return res, nil
 }
 
-func parseTypeName(expr ast.Expr) (string, error) {
+func parseTypeRef(pkg *Package, expr ast.Expr) (*TypeRef, error) {
 	switch t := expr.(type) {
 	case *ast.Ident:
-		return t.Name, nil
+		name := t.Name
+		if prim := IsPrimitive(name); prim != nil {
+			return &TypeRef{
+				RefKind:   RefPrimitive,
+				Primitive: prim,
+				Name:      name,
+			}, nil
+		}
+		return &TypeRef{
+			RefKind:     RefRef,
+			Name:        name,
+			ExternalPkg: "",
+		}, nil
 	case *ast.SelectorExpr:
 		typeSel := t.Sel.Name
 		pkgIdent, ok := t.X.(*ast.Ident)
 		if !ok {
-			return "", errors.Errorf("expected typename in field %#v", t)
+			// TODO: is there anything else?
+			return nil, errors.Errorf("expected typename in field %#v", t)
 		}
-		return pkgIdent.Name + "." + typeSel, nil
+		return &TypeRef{
+			RefKind:     RefRef,
+			Name:        typeSel,
+			ExternalPkg: pkgIdent.Name, // TODO: resolve full package name
+		}, nil
 	case *ast.StarExpr:
-		prefix := "*"
-		nxt, err := parseTypeName(t.X)
+		nxt, err := parseTypeRef(pkg, t.X)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
-		return prefix + nxt, nil
+		if nxt.IsPointer {
+			nxt.AdditionalPointers++
+		} else {
+			nxt.IsPointer = true
+		}
+		return nxt, nil
 	case *ast.FuncType:
-		// TODO: handle params and results
-		return "func (...) (...)", nil
+		// TODO: handle params and results, or at least save them in Embedded
+		return &TypeRef{
+			RefKind:  RefEmbedded,
+			Embedded: &Embedded{Kind: Func},
+			Name:     "func()()",
+		}, nil
 	case *ast.ArrayType:
-		prefix := "[]"
-		nxt, err := parseTypeName(t.Elt)
+		// t.Len, as well as arrays (not slices) are not supported
+		nxt, err := parseTypeRef(pkg, t.Elt)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
-		return prefix + nxt, nil
+		return &TypeRef{
+			RefKind:   RefSlice,
+			ValueType: nxt,
+			Name:      "[]",
+		}, nil
+	case *ast.InterfaceType:
+		return &TypeRef{
+			RefKind:  RefEmbedded,
+			Embedded: &Embedded{Kind: Interface},
+			Name:     "interface{}",
+		}, nil
+	case *ast.MapType:
+		mapKey, err := parseTypeRef(pkg, t.Key)
+		if err != nil {
+			return nil, err
+		}
+		mapValue, err := parseTypeRef(pkg, t.Value)
+		if err != nil {
+			return nil, err
+		}
+		return &TypeRef{
+			RefKind:   RefMap,
+			KeyType:   mapKey,
+			ValueType: mapValue,
+			Name:      "map[][]",
+		}, nil
 	default:
-		return "", errors.Errorf("expected typename in field %#v", t)
+		return nil, errors.Errorf("expected typename in field %#v", t)
 	}
 }
 

@@ -5,17 +5,17 @@ import (
 )
 
 type Model struct {
-	Struct *astinfo.Type
+	Struct *astinfo.TypeDecl
 	Fields []Field
 }
 
 type Field struct {
 	Name     string
-	Type     string
+	Type     *astinfo.TypeRef
 	AstField *astinfo.Field
 }
 
-func parseModel(info *astinfo.Type) (*Model, error) { //nolint:unparam
+func parseModel(info *astinfo.TypeDecl) (*Model, error) { //nolint:unparam
 	if info.Kind != astinfo.Struct {
 		return nil, nil
 	}

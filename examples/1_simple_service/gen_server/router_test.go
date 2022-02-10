@@ -13,19 +13,19 @@ type inventoryImpl struct {
 	bar func()
 }
 
-func (i *inventoryImpl) Foo() (proto.Foo, error) {
+func (i *inventoryImpl) Foo() (*proto.Foo, error) {
 	i.foo()
-	return proto.Foo{}, nil
+	return &proto.Foo{}, nil
 }
 
-func (i *inventoryImpl) Bar(proto.Bar) error {
+func (i *inventoryImpl) Bar(*proto.Bar) error {
 	i.bar()
 	return nil
 }
 
 func TestRouter(t *testing.T) {
 	impl := &inventoryImpl{}
-	router := NewRouter(Handlers{Inventory: impl}, nil)
+	router := NewRouter(&Handlers{Inventory: impl}, nil)
 
 	type testcase struct {
 		method  string

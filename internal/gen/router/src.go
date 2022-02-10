@@ -60,18 +60,18 @@ func (r *Router) GenerateSrc() (*jen.File, error) {
 
 func (r *Router) genStruct(f *jen.File) {
 	f.Type().Id(r.StructName).Struct(
-		jen.Id(r.HandlersField).Id(r.HandlersType),
+		jen.Id(r.HandlersField).Op("*").Id(r.HandlersType),
 		jen.Id(r.ErrorConverterField).Qual(r.JsonrpcPkg, "ErrorConverter"),
 	)
-	// type Router struct {
-	//	handlers Handlers
+	//type Router struct {
+	//	handlers *Handlers
 	//	convertError jsonrpc.ErrorConverter
 	//}
 }
 
 func (r *Router) genConstructor(f *jen.File) {
 	f.Func().Id(r.ConstructorName).Params(
-		jen.Id(r.HandlersField).Id(r.HandlersType),
+		jen.Id(r.HandlersField).Op("*").Id(r.HandlersType),
 		jen.Id(r.ErrorConverterField).Qual(r.JsonrpcPkg, "ErrorConverter"),
 	).Params(jen.Op("*").Id(r.StructName)).Block(
 		jen.If(jen.Id(r.ErrorConverterField).Op("==").Nil()).Block(
@@ -82,10 +82,10 @@ func (r *Router) genConstructor(f *jen.File) {
 			jen.Id(r.ErrorConverterField): jen.Id(r.ErrorConverterField),
 		}),
 	)
-	// func NewRouter(handlers Handlers, convertError jsonrpc.ErrorConverter) *Router {
+	//func NewRouter(handlers Handlers, convertError jsonrpc.ErrorConverter) *Router {
 	//	if convertError == nil {
 	//	  convertError = jsonrpc.DefaultErrorConverter
-	//  }
+	// }
 	//	return &Router{
 	//	  handlers: handlers,
 	//	  convertError: convertError,
@@ -149,24 +149,31 @@ func (r *Router) genMethodCall(g *jen.Group, e *endpoint) error {
 	var arguments []jen.Code
 	var requestType *jen.Statement
 	for _, param := range method.methodAST.Params {
-		switch param.Type {
-		case "jsonrpc.Request":
+		switch {
+		case param.Type.KindaIs("jsonrpc.Request"):
 			arguments = append(arguments, jen.Id("req"))
-		case "context.Context":
+		case param.Type.KindaIs("context.Context"):
 			arguments = append(arguments, jen.Id("req").Dot("Context"))
 		default:
 			// TODO: assert compatibility with methodProto
 			if requestType != nil {
-				return errors.Errorf("should be exactly one request object, found %s and %s", requestType.GoString(), param.Type)
+				return errors.Errorf("should be exactly one request object, found %s and %v", requestType.GoString(), param.Type)
 			}
 
-			if astinfo.IsPrimitive(param.Type) {
-				requestType = jen.Id(param.Type)
+			if param.Type.RefKind == astinfo.RefPrimitive {
+				requestType = jen.Id(param.Type.Name)
+			} else if param.Type.RefKind == astinfo.RefRef && param.Type.ExternalPkg == "" {
+				requestType = jen.Qual(r.proto.Package.PkgImportPath, param.Type.Name)
 			} else {
-				requestType = jen.Qual(r.proto.Package.PkgImportPath, param.Type)
+				return errors.Errorf("unsupported type ref %v", param.Type)
 			}
 
-			arguments = append(arguments, reqVar)
+			var reqArgument jen.Code = reqVar
+			if param.Type.IsPointer {
+				reqArgument = jen.Op("&").Add(reqArgument)
+			}
+
+			arguments = append(arguments, reqArgument)
 		}
 	}
 
@@ -196,8 +203,8 @@ func (r *Router) genMethodCall(g *jen.Group, e *endpoint) error {
 	)
 
 	for _, res := range method.methodAST.Results {
-		switch res.Type {
-		case "error":
+		switch {
+		case res.Type.IsError():
 			if resError != nil {
 				return errors.Errorf("should be exactly one error object, found %s and %s", resError.Type, res.Type)
 			}

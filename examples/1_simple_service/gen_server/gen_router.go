@@ -10,11 +10,11 @@ import (
 )
 
 type Router struct {
-	handlers     Handlers
+	handlers     *Handlers
 	convertError jsonrpc.ErrorConverter
 }
 
-func NewRouter(handlers Handlers, convertError jsonrpc.ErrorConverter) *Router {
+func NewRouter(handlers *Handlers, convertError jsonrpc.ErrorConverter) *Router {
 	if convertError == nil {
 		convertError = jsonrpc.DefaultErrorConverter
 	}
@@ -63,7 +63,7 @@ func (r *Router) handleInventoryBar(path []string, req *jsonrpc.Request) (jsonrp
 		if err := json.Unmarshal(req.Params, &request); err != nil {
 			return r.convertError(err)
 		}
-		err := r.handlers.Inventory.Bar(request)
+		err := r.handlers.Inventory.Bar(&request)
 		if err != nil {
 			return r.convertError(err)
 		}

@@ -7,11 +7,11 @@ import (
 
 type Service struct {
 	Path      []string
-	Interface *astinfo.Type
+	Interface *astinfo.TypeDecl
 	Methods   []Method
 }
 
-func parseService(info *astinfo.Type) (*Service, error) {
+func parseService(info *astinfo.TypeDecl) (*Service, error) {
 	if info.Kind != astinfo.Interface {
 		return nil, nil
 	}
@@ -66,8 +66,8 @@ type Method struct {
 	Path       []string
 	FullPath   string
 	Method     *astinfo.Method
-	ParamsType string
-	ResultType string
+	ParamsType *astinfo.TypeRef
+	ResultType *astinfo.TypeRef
 }
 
 func parseMethod(method *astinfo.Method) (*Method, error) {
@@ -93,7 +93,7 @@ func parseMethod(method *astinfo.Method) (*Method, error) {
 		return nil, errors.Errorf("invalid annotation %s on method %s", methodAnno.Key, method.Name)
 	}
 
-	paramsType := ""
+	var paramsType *astinfo.TypeRef
 	if len(method.Params) != 0 {
 		if len(method.Params) != 1 {
 			return nil, errors.Errorf("method %s has more than one parameter, only single params objects is supported", method.Name)
@@ -101,11 +101,11 @@ func parseMethod(method *astinfo.Method) (*Method, error) {
 		paramsType = method.Params[0].Type
 	}
 
-	resultType := ""
+	var resultType *astinfo.TypeRef
 	if len(method.Results) > 2 || len(method.Results) < 1 {
 		return nil, errors.Errorf("method %s has more than two results, only single result object and error is supported", method.Name)
 	}
-	if method.Results[len(method.Results)-1].Type != "error" {
+	if !method.Results[len(method.Results)-1].Type.IsError() {
 		return nil, errors.Errorf("method %s must have error as the last result parameter", method.Name)
 	}
 	if len(method.Results) == 2 {
