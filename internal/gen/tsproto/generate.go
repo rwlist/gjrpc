@@ -3,6 +3,8 @@ package tsproto
 import (
 	"bytes"
 	_ "embed"
+	"fmt"
+	"github.com/rwlist/gjrpc/internal/gen/astinfo"
 	"text/template"
 
 	"github.com/rwlist/gjrpc/internal/gen/protog"
@@ -32,6 +34,15 @@ func GenerateSource(proto *protog.Protocol) (string, error) {
 		if err != nil {
 			return "", err
 		}
+	}
+
+	for _, t := range proto.Package.Types {
+		if t.Kind != astinfo.Alias {
+			continue
+		}
+
+		_ = w.WriteByte('\n')
+		_, _ = fmt.Fprintf(w, "export type %s = %s", t.Name, convertGoType(t.Alias))
 	}
 
 	return w.String(), nil

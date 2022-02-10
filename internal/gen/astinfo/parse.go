@@ -114,6 +114,7 @@ func parseType(pkg *Package, s *ast.TypeSpec, doc *ast.CommentGroup) error {
 		}
 	case *ast.Ident:
 		t.Kind = Alias
+		t.Alias = expr.Name
 		// TODO: recursive method detection?
 	default:
 		return errors.Errorf("unknown type %v", expr)

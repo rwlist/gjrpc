@@ -18,6 +18,9 @@ type Type struct {
 
 	// only for Interface
 	Methods []Method
+
+	// only for Alias
+	Alias string
 }
 
 type Annotation struct {

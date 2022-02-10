@@ -15,5 +15,9 @@ func convertGoType(t string) string {
 		// TODO: handle slices
 		return t[2:] + "[]"
 	}
+	if t == "uint" {
+		// TODO: handle numeric types
+		return "number"
+	}
 	return t
 }
