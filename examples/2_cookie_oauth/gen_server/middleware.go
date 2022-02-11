@@ -26,7 +26,7 @@ func AuthMiddleware(auth AuthProvider, exceptions []string) jsonrpc.Middleware {
 			accessToken := AccessTokenFromRequest(httpReq)
 			err := auth.Check(accessToken)
 			if err != nil {
-				return nil, jsonrpc.ForbiddenError.WithData(err.Error())
+				return nil, jsonrpc.UnknownError.WithData(err.Error())
 			}
 
 			return next(req)

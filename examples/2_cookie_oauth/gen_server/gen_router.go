@@ -8,11 +8,11 @@ import (
 )
 
 type Router struct {
-	handlers     Handlers
+	handlers     *Handlers
 	convertError jsonrpc.ErrorConverter
 }
 
-func NewRouter(handlers Handlers, convertError jsonrpc.ErrorConverter) *Router {
+func NewRouter(handlers *Handlers, convertError jsonrpc.ErrorConverter) *Router {
 	if convertError == nil {
 		convertError = jsonrpc.DefaultErrorConverter
 	}

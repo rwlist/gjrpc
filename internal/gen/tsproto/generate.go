@@ -53,11 +53,11 @@ var tmplHeader string
 
 //go:embed api.tstmpl
 var tmplAPI string
-var apiTemplate = template.Must(template.New("api").Parse(tmplAPI))
+var apiTemplate = template.Must(template.New("api").Funcs(funcMap).Parse(tmplAPI))
 
 //go:embed service.tstmpl
 var tmplService string
-var serviceTemplate = template.Must(template.New("service").Parse(tmplService))
+var serviceTemplate = template.Must(template.New("service").Funcs(funcMap).Parse(tmplService))
 
 //go:embed model.tstmpl
 var tmplModel string
