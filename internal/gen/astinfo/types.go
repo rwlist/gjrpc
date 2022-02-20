@@ -78,11 +78,7 @@ func (r *TypeRef) IsError() bool {
 }
 
 func (r *TypeRef) KindaIs(s string) bool {
-	if r.ExternalPkg+"."+r.Name == s {
-		return true
-	}
-
-	return false
+	return r.ExternalPkg+"."+r.Name == s
 }
 
 func (r *TypeRef) PackageLookSame(s string) bool {
@@ -91,11 +87,7 @@ func (r *TypeRef) PackageLookSame(s string) bool {
 	}
 
 	sPath := strings.Split(s, "/")
-	if sPath[len(sPath)-1] == r.ExternalPkg {
-		return true
-	}
-
-	return false
+	return sPath[len(sPath)-1] == r.ExternalPkg
 }
 
 type Annotation struct {

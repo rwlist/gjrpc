@@ -8,13 +8,15 @@ var funcMap = map[string]interface{}{
 	"convertGoType": convertGoType,
 }
 
+const unknown = "unknown"
+
 func convertGoType(t *astinfo.TypeRef) string {
 	// TODO: pointers are ignored, worth an optional thing?
 	switch t.RefKind {
 	case astinfo.RefPrimitive:
 		return convertGoPrimitive(t.Primitive)
 	case astinfo.RefEmbedded:
-		return "unknown"
+		return unknown
 	case astinfo.RefMap:
 		return "Record<" + convertGoType(t.KeyType) + ", " + convertGoType(t.ValueType) + ">"
 	case astinfo.RefSlice:
@@ -24,13 +26,16 @@ func convertGoType(t *astinfo.TypeRef) string {
 			return t.Name
 		} else {
 			// TODO: possible to embed?
-			return "unknown"
+			return unknown
 		}
+	case astinfo.RefUnknown:
+		return unknown
 	}
 
-	return "unknown"
+	return unknown
 }
 
+//nolint:goconst
 func convertGoPrimitive(primitive *astinfo.Primitive) string {
 	switch primitive {
 	case astinfo.PrimitiveBool:
@@ -43,5 +48,5 @@ func convertGoPrimitive(primitive *astinfo.Primitive) string {
 		return "number"
 	}
 
-	return "unknown"
+	return unknown
 }

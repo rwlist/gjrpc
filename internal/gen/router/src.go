@@ -142,6 +142,7 @@ func (r *Router) genHandle(f *jen.File, item queueItem) (err error) {
 	return err
 }
 
+//nolint:funlen
 func (r *Router) genMethodCall(g *jen.Group, e *endpoint) error {
 	reqVar := jen.Id("request")
 	method := e.methodImpl
@@ -162,7 +163,8 @@ func (r *Router) genMethodCall(g *jen.Group, e *endpoint) error {
 
 			if param.Type.RefKind == astinfo.RefPrimitive {
 				requestType = jen.Id(param.Type.Name)
-			} else if param.Type.RefKind == astinfo.RefRef && (param.Type.ExternalPkg == "" || param.Type.PackageLookSame(r.proto.Package.PkgImportPath)) {
+			} else if param.Type.RefKind == astinfo.RefRef &&
+				(param.Type.ExternalPkg == "" || param.Type.PackageLookSame(r.proto.Package.PkgImportPath)) {
 				requestType = jen.Qual(r.proto.Package.PkgImportPath, param.Type.Name)
 			} else {
 				return errors.Errorf("unsupported type ref %v", param.Type)
@@ -206,14 +208,14 @@ func (r *Router) genMethodCall(g *jen.Group, e *endpoint) error {
 		switch {
 		case res.Type.IsError():
 			if resError != nil {
-				return errors.Errorf("should be exactly one error object, found %s and %s", resError.Type, res.Type)
+				return errors.Errorf("should be exactly one error object, found %#v and %#v", resError.Type, res.Type)
 			}
 			res := res
 			resError = &res
 			results = append(results, jen.Id(errVar))
 		default:
 			if resResponse != nil {
-				return errors.Errorf("should be exactly one result, found %s and %s", resResponse.Type, res.Type)
+				return errors.Errorf("should be exactly one result, found %#v and %#v", resResponse.Type, res.Type)
 			}
 			res := res
 			resResponse = &res

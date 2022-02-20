@@ -4,8 +4,9 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
-	"github.com/rwlist/gjrpc/internal/gen/astinfo"
 	"text/template"
+
+	"github.com/rwlist/gjrpc/internal/gen/astinfo"
 
 	"github.com/rwlist/gjrpc/internal/gen/protog"
 )

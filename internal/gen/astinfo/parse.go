@@ -117,6 +117,9 @@ func parseType(pkg *Package, s *ast.TypeSpec, doc *ast.CommentGroup) error {
 	case *ast.Ident:
 		t.Kind = Alias
 		t.Alias, err = parseTypeRef(pkg, expr)
+		if err != nil {
+			return err
+		}
 	default:
 		// TODO: parse type ref here also?
 		return errors.Errorf("unknown type %v", expr)
@@ -282,7 +285,7 @@ func parseTypeRef(pkg *Package, expr ast.Expr) (*TypeRef, error) {
 			Name:      "map[][]",
 		}, nil
 	default:
-		return nil, errors.Errorf("expected typename in field %#v", t)
+		return nil, errors.Errorf("expected typename in field %#v, pkg=%s", t, pkg.PkgName)
 	}
 }
 

@@ -61,7 +61,7 @@ func newHandlerFromAST(f astinfo2.Field, currentPkg *astinfo2.Package, proto *pr
 		if !ok {
 			_, _ = fmt.Fprintf(
 				os.Stderr,
-				"WARN: method %s.%s not implemented in %s %s",
+				"WARN: method %s.%s not implemented in %s %#v",
 				targetService.Interface.Name,
 				method.Method.Name,
 				f.Name,
@@ -94,7 +94,7 @@ func newHandlerFromAST(f astinfo2.Field, currentPkg *astinfo2.Package, proto *pr
 func lookupUserHandler(currentPkg *astinfo2.Package, proto *protog.Protocol, typeRef *astinfo2.TypeRef) (*astinfo2.TypeDecl, error) {
 	// TODO: implement real lookup, even for outer packages
 	if typeRef.RefKind != astinfo2.RefRef {
-		return nil, errors.Errorf("trying to lookup type with ref kind %s, this makes no sense", typeRef.RefKind)
+		return nil, errors.Errorf("trying to lookup type with ref kind %#v, this makes no sense", typeRef.RefKind)
 	}
 
 	if proto.Package.PkgName == typeRef.ExternalPkg {
