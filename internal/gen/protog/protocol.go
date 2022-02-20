@@ -27,3 +27,7 @@ type ProtocolType struct {
 	Service *Service
 	Model   *Model
 }
+
+func (t ProtocolType) NotKnownType() bool {
+	return t.Service == nil && t.Model == nil
+}

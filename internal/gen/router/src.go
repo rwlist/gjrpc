@@ -162,7 +162,7 @@ func (r *Router) genMethodCall(g *jen.Group, e *endpoint) error {
 
 			if param.Type.RefKind == astinfo.RefPrimitive {
 				requestType = jen.Id(param.Type.Name)
-			} else if param.Type.RefKind == astinfo.RefRef && param.Type.ExternalPkg == "" {
+			} else if param.Type.RefKind == astinfo.RefRef && (param.Type.ExternalPkg == "" || param.Type.PackageLookSame(r.proto.Package.PkgImportPath)) {
 				requestType = jen.Qual(r.proto.Package.PkgImportPath, param.Type.Name)
 			} else {
 				return errors.Errorf("unsupported type ref %v", param.Type)

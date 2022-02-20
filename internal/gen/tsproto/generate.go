@@ -37,12 +37,16 @@ func GenerateSource(proto *protog.Protocol) (string, error) {
 	}
 
 	for _, t := range proto.Package.Types {
-		if t.Kind != astinfo.Alias {
-			continue
+		if t.Kind == astinfo.Alias {
+			_ = w.WriteByte('\n')
+			_, _ = fmt.Fprintf(w, "export type %s = %s\n", t.Name, convertGoType(t.Alias))
 		}
 
-		_ = w.WriteByte('\n')
-		_, _ = fmt.Fprintf(w, "export type %s = %s", t.Name, convertGoType(t.Alias))
+		// support unused interfaces as unknown types
+		if t.Kind == astinfo.Interface && proto.Types[t.Name].NotKnownType() {
+			_ = w.WriteByte('\n')
+			_, _ = fmt.Fprintf(w, "export type %s = %s\n", t.Name, "unknown")
+		}
 	}
 
 	return w.String(), nil

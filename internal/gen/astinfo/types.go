@@ -1,5 +1,7 @@
 package astinfo
 
+import "strings"
+
 const annotationPrefix = "gjrpc:"
 
 type Kind string
@@ -77,6 +79,19 @@ func (r *TypeRef) IsError() bool {
 
 func (r *TypeRef) KindaIs(s string) bool {
 	if r.ExternalPkg+"."+r.Name == s {
+		return true
+	}
+
+	return false
+}
+
+func (r *TypeRef) PackageLookSame(s string) bool {
+	if r.ExternalPkg == s {
+		return true
+	}
+
+	sPath := strings.Split(s, "/")
+	if sPath[len(sPath)-1] == r.ExternalPkg {
 		return true
 	}
 

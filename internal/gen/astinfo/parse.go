@@ -39,7 +39,9 @@ func ParseDir(path string) (*Package, error) {
 		return nil, errors.Errorf("required exactly 1 package in directory, found %v", len(pkgs))
 	}
 
-	for _, pkg := range pkgs {
+	for _, unresolvedPkg := range pkgs {
+		// TODO: provide importer and universe to handle resolving imports
+		pkg, _ := ast.NewPackage(fset, unresolvedPkg.Files, nil, nil)
 		return ParsePkg(pkg, buildPkg)
 	}
 

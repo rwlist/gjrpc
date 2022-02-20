@@ -9,7 +9,7 @@ export interface {{.Interface.Name}} {
 export class {{.Interface.Name}}Impl implements {{.Interface.Name}} {
     constructor(private transport: Transport) {}{{range .Methods}}
 
-    async {{.Method.Name}}({{if .ParamsType}}params: {{.ParamsType}}{{end}}): Promise<{{if .ResultType}}{{convertGoType .ResultType}}{{else}}unknown{{end}}> {
+    async {{.Method.Name}}({{if .ParamsType}}params: {{convertGoType .ParamsType}}{{end}}): Promise<{{if .ResultType}}{{convertGoType .ResultType}}{{else}}unknown{{end}}> {
         return (await this.transport.request("{{.FullPath}}", {{if .ParamsType}}params{{else}}null{{end}})){{if .ResultType}} as {{convertGoType .ResultType}}{{end}};
     }{{end}}
 }
