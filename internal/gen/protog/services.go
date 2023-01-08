@@ -94,6 +94,9 @@ func parseMethod(method *astinfo.Method) (*Method, error) {
 	}
 
 	var paramsType *astinfo.TypeRef
+	if len(method.Params) > 0 && isContextType(method.Params[0].Type) {
+		method.Params = method.Params[1:]
+	}
 	if len(method.Params) != 0 {
 		if len(method.Params) != 1 {
 			return nil, errors.Errorf("method %s has more than one parameter, only single params objects is supported", method.Name)
@@ -118,4 +121,8 @@ func parseMethod(method *astinfo.Method) (*Method, error) {
 		ParamsType: paramsType,
 		ResultType: resultType,
 	}, nil
+}
+
+func isContextType(t *astinfo.TypeRef) bool {
+	return t.RefKind == astinfo.RefRef && t.Name == "Context" && t.ExternalPkg == "context"
 }

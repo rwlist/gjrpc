@@ -25,3 +25,11 @@ is easy to use and easy to implement.
 
 This tooling will allow to create API from go declarations, and also generate code for servers and clients in other 
 languages.
+
+## Development
+
+To build and install gjrpc from sources:
+
+```
+go install
+```

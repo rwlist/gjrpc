@@ -1,10 +1,11 @@
 package gen_server
 
 import (
-	"github.com/go-chi/chi/v5"
-	"github.com/rwlist/gjrpc/pkg/gjserver"
-	"github.com/rwlist/gjrpc/pkg/jsonrpc"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/rwlist/gjrpc/pkg/jsonrpc"
+	"github.com/rwlist/gjrpc/pkg/transport"
 )
 
 const cookieAccessToken = "access_token"
@@ -22,7 +23,7 @@ type OAuthService interface {
 }
 
 func NewServer(handler jsonrpc.Handler, oauthService OAuthService) chi.Router {
-	rpcHandler := &gjserver.HandlerHTTP{
+	rpcHandler := &transport.HandlerHTTP{
 		Handler: handler,
 	}
 
