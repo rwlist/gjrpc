@@ -34,11 +34,9 @@ func TestResponseMarshal(t *testing.T) {
 			ID:      nil,
 		}, {
 			Version: "2.0",
-			Result: struct {
-				Token string `json:"token"`
-			}{Token: "abc"},
-			Error: nil,
-			ID:    nil,
+			Result:  json.RawMessage(`{"token": "abc"}`),
+			Error:   nil,
+			ID:      nil,
 		},
 	}
 

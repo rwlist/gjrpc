@@ -94,16 +94,48 @@ func (r *Router) genConstructor(f *jen.File) {
 }
 
 func (r *Router) genMainHandle(f *jen.File) {
-	r.methodHandle(f, "Handle",
-		jen.Id("req").Add(r.jsonrpcRequest()),
+	r.method(f, "Handle").Params(
+		jen.Id("req").Op("*").Qual(r.JsonrpcPkg, "Request"),
+	).Params(
+		jen.Op("*").Qual(r.JsonrpcPkg, "Response"),
 	).Block(
 		jen.Id("path").Op(":=").Qual("strings", "Split").Call(jen.Id("req").Dot("Method"), jen.Lit(".")),
-		jen.Return().Id("r").Dot("handle").Call(jen.Id("path"), jen.Id("req")),
+		jen.List(jen.Id("res"), jen.Id("e")).Op(":=").Id("r").Dot("handle").Call(jen.Id("path"), jen.Id("req")),
+		jen.Var().Id("result").Qual(
+			"encoding/json",
+			"RawMessage",
+		),
+		jen.If(jen.Id("e").Op("==").Id("nil")).Block(
+			jen.Var().Id("err").Id("error"),
+			jen.List(
+				jen.Id("result"),
+				jen.Id("err"),
+			).Op("=").Qual(
+				"encoding/json",
+				"Marshal",
+			).Call(jen.Id("res")),
+			jen.If(jen.Id("err").Op("!=").Id("nil")).Block(
+				jen.List(
+					jen.Id("_"),
+					jen.Id("e"),
+				).Op("=").Id("r").Dot("convertError").Call(jen.Id("err")),
+			),
+		),
+		jen.Return().Qual(r.JsonrpcPkg, "NewResponse").Call(jen.Id("req"), jen.Id("result"), jen.Id("e")),
 	)
-	// func (r *Router) Handle(req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
-	//	path := strings.Split(req.Method, ".")
-	//	return r.handle(path, req)
-	//}
+	// func (r *Router) Handle(req *jsonrpc.Request) *jsonrpc.Response {
+	// 	path := strings.Split(req.Method, ".")
+	// 	res, e := r.handle(path, req)
+	// 	var result json.RawMessage
+	// 	if e == nil {
+	// 		var err error
+	// 		result, err = json.Marshal(res)
+	// 		if err != nil {
+	// 			_, e = r.convertError(err)
+	// 		}
+	// 	}
+	// 	return jsonrpc.NewResponse(req, result, e)
+	// }
 }
 
 func (r *Router) genNotFound(f *jen.File) {

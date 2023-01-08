@@ -1,8 +1,8 @@
 package gen_server
 
 import (
-	"github.com/rwlist/gjrpc/pkg/gjserver"
 	"github.com/rwlist/gjrpc/pkg/jsonrpc"
+	"github.com/rwlist/gjrpc/pkg/transport"
 )
 
 type AuthProvider interface {
@@ -22,7 +22,7 @@ func AuthMiddleware(auth AuthProvider, exceptions []string) jsonrpc.Middleware {
 			}
 
 			ctx := req.Context
-			httpReq := gjserver.HttpRequest(ctx)
+			httpReq := transport.HttpRequest(ctx)
 			accessToken := AccessTokenFromRequest(httpReq)
 			err := auth.Check(accessToken)
 			if err != nil {

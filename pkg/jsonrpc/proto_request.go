@@ -31,11 +31,17 @@ type Request struct {
 	Params json.RawMessage `json:"params"`
 
 	// ID is an identifier established by the Client that MUST contain a String, Number,
-	// or NULL value if included.
+	// or NULL value if included. If it is not included it is assumed to be a notification.
+	// The value SHOULD normally not be Null and Numbers SHOULD NOT contain fractional parts.
 	ID ID `json:"id"`
-
-	// TODO: should we add Authorization from http header, or context is enough?
 
 	// Context with additional metadata for the request.
 	Context context.Context `json:"-"`
+}
+
+// A Notification is a Request object without an "id" member. A Request object that is a Notification
+// signifies the Client's lack of interest in the corresponding Response object, and as such no Response
+// object needs to be returned to the client.
+func (r *Request) IsNotification() bool {
+	return r.ID == nil
 }
